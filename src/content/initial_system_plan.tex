@@ -78,22 +78,23 @@ can be seen on figure \ref{fig:ros_husky}.
 
 
 \subsection{PX4 Autopilot Software}
-PX4 is a powerful open-source autopilot flight stack. PX4 can control many different vehicle frames and types,
-supports wide variety of sensors and peripherals. The project is a part of Dronecode, a nonprofit foundation
-working on open-source projects to achieve standardization of drones.\cite{PX4Website} 
+PX4 is a powerful open-source autopilot flight stack. PX4 can control many different vehicle frames and vehicle 
+types, supports wide variety of sensors and peripherals. The project is a part of Dronecode, a nonprofit
+foundation working on open-source projects to achieve standardization of drones.\cite{PX4Website} 
 
-The core component of PX4 is the flight controller that controls the motors based on sensor measurements 
-and executes commands received from ground control.
+The core component of PX4 is the flight stack or flight controller that controls the motors based on sensor
+measurements and executes commands received from ground control. Besides the flight stack the repository 
+also contains Gazebo simulation files of multiple vehicles and an extensive \verb|Makefile| that makes 
+starting simulations relatively easy. 
 
-
-The PX4 Repository contains simulation files for Gazebo with many kind of vehicles. Using the simulator 
-the same PX4 flight code can run on a computer modelled drone that would run on a real vehicle. The models can
-be further extended by sensors or other peripherals, by modifying the SDF model files. SDF files are 
-based on XML format, that makes them humanly readable and easy to modify using a text editor. 
-
-The basic outline of the PX4 Software in the loop simulation can be seen on figure \ref{fig:px4_sitl_simulation}.
-
-
+\subsubsection{PX4 simulation using MAVROS}
+The logical units of the simulation can be seen on figure \ref{fig:px4_sitl_simulation}.
+By executing a \verb|make| command the Gazebo Simulator, the PX4 SITL flight stack and the API/Offboard units
+are started at once. The PX4 SITL flight stack connects on a TCP port to the simulator, receives sensor data, 
+calculates and sends motor and actuator values to the simulated vehicle. There are two options for the navigation
+of the simulated drone: using an Offboard API or a Ground Control Station. For autonomous flight control an 
+Offboard API needs to be used and MAVROS is a suitable choice, it basically offers a ROS interface for 
+the drone. It forwards all messages from the flight stack to ROS topics and vice versa.
 
 \begin{figure}[h]
     \centering
@@ -102,10 +103,58 @@ The basic outline of the PX4 Software in the loop simulation can be seen on figu
     \label{fig:px4_sitl_simulation}
 \end{figure}
 
+\subsubsection{PX4 simulation using Gazebo with ROS wrapper}
 
+%New sensors from simulator through SITL or straight to ROS
+Drone models are described using SDF files that are XML based and by modifying these files new sensors can 
+be added. Gazebo loads the selected vehicle and the sensors, but if a selected sensor is not supported by
+PX4, its measurements will not be forwarded to MAVROS and therefore to ROS topics. It can be troublesome 
+to always use sensors that are supported by the flight controller, not to mention that the MAVLink protocol 
+is designed for small messages so the bandwidth can be too low in some cases. Luckily Gazebo can 
+be started with a ROS wrapper and therefore all sensors can be accessed on ROS topics. However this technique
+cannot be used on a real drone with the original PX4 firmware, because it purely relies on MAVLink messages, 
+but for simulation purposes it's an elegant solution. This modified overview of the units used for simulation
+can be seen on figure \ref{fig:px4_sitl_ros_wrapper}
 
-\newpage
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=120mm, keepaspectratio]{figures/px4_sitl_with_ros.png}
+    \includegraphics[width=140mm]{figures/iris_gazebo.png}
+    \caption{PX4 Simulation using Gazebo with ROS wrapper}
+    \label{fig:px4_sitl_ros_wrapper}
+\end{figure}
+
+\subsubsection{Pixhawk 4}
+Pixhawk 4 is an advanced autopilot designed by the collaboration of Holybro and PX4 team. It is optimized
+to run the official PX4 flight stack. Because of its modular-, open-design and open-source firmware, it is 
+a good choice for rapid development and academic purposes.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=25mm, keepaspectratio]{figures/pixhawk4.jpg}\hspace{0cm}
+    \includegraphics[width=50mm, keepaspectratio]{figures/pixhawk4_2.jpg}
+    \caption{Pixhawk 4 advanced autopilot}
+    \label{fig:px4_sitl_ros_wrapper}
+\end{figure}
+
 \section{Hardware plan}
+Multiple aspects need to be taken into account to determine the number and the placement of the LIDAR sensors.
+The specifications of the LIDAR and the characteristics of SLAM algorithms also drive these aspects. 
+Higher sampling rate can be achieved by placing multiple of these sensors close to each other in a way that 
+their scanned trajectories overlap. While the resolution needed by the chosen SLAM algorithm also affects 
+the number and placement of the sensors, but the resolution can be increased by narrowing down the region of 
+interest of the LIDAR.
+
+Quadcopters have a natural tendency to increase their pitch and roll angles to move on the horizontal plane.
+These angle changes can be used for a more detailed scan and by considering the average angles in an indoor
+environment, an optimal placement of the sensors can be found. While during simulations we don't need to 
+worry about physically placing the sensors on the frame, in reality there might be limitations, even using 
+small sensors.
+
+On a real drone, measurements cannot be sent straight to ROS topics and these sensors need to be configured, 
+so there needs to be a device that handles communication with the sensor on I2C bus and forwards messages 
+to ROS topics. This device can be the PixHawk
+
 \subsection{VL53L1X LIDAR}
 \subsection{LIDAR placement}
 \subsection{LIDAR data collection}
