@@ -114,20 +114,27 @@ is designed for small messages so the bandwidth can be too low in some cases. Lu
 be started with a ROS wrapper and therefore all sensors can be accessed on ROS topics. However this technique
 cannot be used on a real drone with the original PX4 firmware, because it purely relies on MAVLink messages, 
 but for simulation purposes it's an elegant solution. This modified overview of the units used for simulation
-can be seen on figure \ref{fig:px4_sitl_ros_wrapper}
+and a screenshot of an Iris drone simulated in Gazebo can be seen on figure \ref{fig:px4_sitl_ros_wrapper}. 
+MAVROS is still needed to be run, because there are some messages that would not be published to ROS otherwise.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=120mm, keepaspectratio]{figures/px4_sitl_with_ros.png}
+    \includegraphics[width=140mm, keepaspectratio]{figures/px4_sitl_with_ros.png}
     \includegraphics[width=140mm]{figures/iris_gazebo.png}
     \caption{PX4 Simulation using Gazebo with ROS wrapper}
     \label{fig:px4_sitl_ros_wrapper}
 \end{figure}
 
 \subsubsection{Pixhawk 4}
-Pixhawk 4 is an advanced autopilot designed by the collaboration of Holybro and PX4 team. It is optimized
-to run the official PX4 flight stack. Because of its modular-, open-design and open-source firmware, it is 
-a good choice for rapid development and academic purposes.
+Pixhawk 4 is an advanced autopilot designed by the collaboration of Holybro and PX4 team \cite{Pixhawk4Website}. 
+It is optimized to run the official PX4 flight stack. Because of its modular-, open-design and open-source 
+firmware, it is a good choice for rapid development and academic purposes. Its modularity comes from the 
+connectors on the top of the device that are used to supply power for the board, output PWM signal for 
+the motors and to add peripherals like GPS antenna, telemetry or integrate custom devices using available
+bus connectors. 
+
+When moving to real world applications, the PX4 SITL flight stack seen on the most left block on figures
+\ref{fig:px4_sitl_simulation} and \ref{fig:px4_sitl_ros_wrapper}, is to be replaced by the Pixhawk 4 board.
 
 \begin{figure}[h]
     \centering
@@ -140,26 +147,108 @@ a good choice for rapid development and academic purposes.
 \section{Hardware plan}
 Multiple aspects need to be taken into account to determine the number and the placement of the LIDAR sensors.
 The specifications of the LIDAR and the characteristics of SLAM algorithms also drive these aspects. 
-Higher sampling rate can be achieved by placing multiple of these sensors close to each other in a way that 
-their scanned trajectories overlap. While the resolution needed by the chosen SLAM algorithm also affects 
-the number and placement of the sensors, but the resolution can be increased by narrowing down the region of 
-interest of the LIDAR.
+Higher sampling rate can be achieved by placing multiple sensors close to each other in a way that 
+their scanned trajectories overlap. The resolution needed by the chosen SLAM algorithm also affects 
+the number and placement of the sensors, the resolution can be increased by narrowing down the field of 
+view of the LIDAR.
 
 Quadcopters have a natural tendency to increase their pitch and roll angles to move on the horizontal plane.
-These angle changes can be used for a more detailed scan and by considering the average angles in an indoor
-environment, an optimal placement of the sensors can be found. While during simulations we don't need to 
-worry about physically placing the sensors on the frame, in reality there might be limitations, even using 
-small sensors.
+These angle changes can be used for a more detailed scan and by considering the average angle changes on 
+these axes during an indoor flight. This way an optimal placement of the sensors can be found. 
+While during simulations we don't need to worry about physically attaching the sensors on the frame or even
+supplying power to them, in reality these might be limiting factors.
 
-On a real drone, measurements cannot be sent straight to ROS topics and these sensors need to be configured, 
-so there needs to be a device that handles communication with the sensor on I2C bus and forwards messages 
-to ROS topics. This device can be the PixHawk
+On a real drone LIDAR measurements cannot be sent straight to ROS topics, because a low level communication needs
+to be established to configure and read out measurements from the sensors. There needs to be a device that 
+handles communication with the sensor and forwards messages to ROS topics.
+This device can be the Pixhawk 4 autopilot board using a custom firmware or a custom built hardware 
+independent from the autopilot board or a combination of these two.
 
-\subsection{VL53L1X LIDAR}
-\subsection{LIDAR placement}
+\subsection{VL53L1X LIDAR sensor}
+VL53L1X is a long distance ranging Time-of-Flight sensor produced by STMicroelectronics \cite{VL53L1XDatasheet}. 
+The size of the module is 4.9x2.5x1.56mm, it emits 940nm invisible laser and uses a SPAD(single photon 
+avalanche diode) receiving array with a field of view of 27$^{\circ}$. The module runs all digital signal
+processing on a built in low power microcontroller that frees up the host processor from these tasks.
+The sensor according to the datasheet is capable of 50Hz ranging frequency and up to 400cm distance 
+measurements. The laser receiving array's size can be programmatically changed by setting 
+region-of-interest(ROI) size. This way the sensor provides multizone operation and a higher resolution than
+by using the whole SPAD array.
+
+\begin{figure}[h]
+    \centering
+    $\vcenter{\hbox{\includegraphics[width=50mm, keepaspectratio]{figures/vl53l1x.png}}}$
+    $\vcenter{\hbox{\includegraphics[width=95mm, keepaspectratio]{figures/vl53l1x_roi.png}}}$
+    \caption{VL53L1X sensor \cite{VL53L1XDatasheet} and region-of-interest \cite{VL53L1XApplicationNote}}
+    \label{fig:VL53L1X_sensor}
+\end{figure}
+
+I chose to use this sensor for prototyping, because of its small size, availability, low hardware 
+infrastructure needs and previous experience. 
+
+\subsubsection{Reference measurements}
+%TODO Reference measurements
+TODO
+
+\subsection{LIDAR layout plan}
+As mentioned before, multiple aspects need to be taken into account when placing LIDAR sensors onto a
+quadcopter and use the measurements for 3D SLAM. There are several parameters of the sensor that are 
+highly affecting the quality of the map built by SLAM algorithms. These are the field of view, the 
+sampling frequency and the maximum distance that it can measure. To better understand the effects of
+these parameters it is reasonable to first reduce complexity and build a system for 2D mapping. Based on 
+the experience gained during this experiment it can be better estimated how many sensors are needed for
+3D SLAM. Also a possible outcome is that VL53L1X is not suitable for this purpose and a different
+sensor needs to be used, with more suitable parameters.
+
+\subsubsection{Layout plans for 2D SLAM}
+To have the best possible layout without overlapping scans, 360$^{\circ}$ of the horizontal plane 
+needs to be covered by the field of view of the LIDAR sensors. The field of view of VL53L1X is 27$^{\circ}$,
+so altogether 13 sensors are needed to cover 97.5\% of the plane, with 27.69$^{\circ}$ in between, leaving
+only 9$^{\circ}$ of dead zone.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=70mm, keepaspectratio]{figures/2d_slam_13sensors.png}
+    \caption{Layout of 13 LIDAR sensors}
+    \label{fig:2d_13sensor_layout}
+\end{figure}
+
+In this layout the scanning of the horizontal plane is done purely by the even placement of the sensors 
+and doesn't take advantage of the movement of the drone during flights. Especially turns around the 
+vertical axis. The usage of 13 LIDAR sensors just for 2D scanning would mean a lot of overhead when 
+stepping up to 3D, so a more optimal solution needs to be found, that does take advantage of the movement 
+of the drone during scanning and therefore uses fewer sensors.
+
+The lower limit for the number of sensors is what can be seen on the solution of Bitcraze, 
+the Multi-ranger deck\cite{BitcrazeMultirangerDeck} uses 4 sensors on the horizontal plane facing forward, 
+backwards, left and right. In their demonstration video, the map of a simple room is built in 
+about 20 seconds with update rate of about 10Hz per sensor. 
+
+\subsubsection{Layout plans for 3D SLAM}
+The layout for 3D SLAM depends on the experience gained during simulations of 2D SLAM. In 3D layout,
+the pitch and roll angle changes need to be taken into account too. These differ from vehicle to vehicle,
+faster drones can have a pitch of 30$^{\circ}$, but in indoor environment nor pitch nor roll will go above
+15$^{\circ}$. 
+
 \subsection{LIDAR data collection}
+On a real drone configuration of LIDAR sensors and measurement forwarding to ROS need to be solved. 
+There needs to be a device that communicates with the VL53L1X LIDAR sensors using I2C communication 
+protocol and forwards messages to a ground station that handles data collection and processing.
+
+The device needs to be fast enough to keep up with the pace of not only one, but with 10-20 sensors
+each with a maximum of 50Hz update rate. The distance data from VL53L1X sensor consists of 12bytes, 
+so 20 sensors on 50Hz generate about 6kb of data per second. This load is calculated using the 
+effective data size, but on the I2C bus other messages need to be sent to trigger data read,
+which means even higher load.
+
 \subsubsection{Logging on SD Card}
+After finishing the evaluation of simulations, it is time to evaluate real-world measurements. 
+For testing of the algorithms data collection is needed and it doesn't need to be done in real-time,
+so building wireless communication is pointless for this purpose. Saving data on an SD card serves this
+purpose because of its low complexity and high speed. 
+
 \subsubsection{Wireless transceiver}
-\subsubsection{Integrating messages into PX4 firmware}
+When SLAM algorithms are verified on offline data 
+
 
 \section{Software plan}
+\subsection{Google Caligrapher 3D SLAM}
