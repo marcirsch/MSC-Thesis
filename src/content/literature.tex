@@ -1,24 +1,72 @@
 \chapter{Literature review}
 
-\section{TeraRanger}
+\section{Basic aviation terminologies}
+
+\subsection{UAV or Drone}
+UAV is short for Unmanned Aerial Vehicle, in other words an airborne vehicle that is capable of movement
+without having a pilot on board. Drone is a subset of UAV, a vehicle that is capable of autonomous flight.
+Usually UAV and the word Drone are used interchangeably in the literature, and it is used so in this thesis.
+
+
+
+\subsection{Body axes used in aviation}
+In aviation Euler angles are used to describe the orientation of an aircraft. Euler angles are three angles
+that describe the orientation of a rigid body with respect to a fixed coordinate system. These axes are 
+referred to as Yaw, Pitch and Roll. Rotation around these axes are Yaw, Pitch 
+and Roll angles respectively. All three angles follow the right-hand rule. 
+
+Magnetic north is used as reference for Yaw, so an angle of 0$^\circ$ or 360$^\circ$ means that the vehicle
+is heading North, 90$^\circ$ means it's heading East. Yaw is sometimes called Heading.
+
+\begin{figure}[!hb]
+    \centering
+	$\vcenter{\hbox{\includegraphics[width=90mm, keepaspectratio]{figures/plane_yaw_pitch_roll.png}}}$
+    $\vcenter{\hbox{\includegraphics[width=40mm, keepaspectratio]{figures/attitude_indicator.png}}}$
+    \caption{Aircraft body axes\cite{AircraftBodyAxes} and attitude instrument}
+    \label{fig:aircraft_body_angles}
+\end{figure}
+
+
+Pitch and Roll angles are calculated in reference to the horizontal plane. The normal vector of the horizontal 
+plane is used for the calculations, and it is the norm of the gravity vector. It is favorable to use the gravity
+vector, because its direction can be measured using an accelerometer. Both Roll and Pitch angles are measured
+from -90$^\circ$ to 90$^\circ$. A Pitch of 90$^\circ$ is straight up and 0$^\circ$ is Horizon. If an aircraft
+flies with 0$^\circ$ Roll angle, the vehicle is horizontal. On the other hand a 90$^\circ$ Roll angle means
+the vehicle is turning right and is perpendicular to the horizon. Pitch is sometimes referred to as Tilt.
+
+The limitation of using Euler angles is reached when Pitch or Roll angles approach 90$^\circ$, because in this 
+case one of these angles become parallel with the gravity vector and the other angle cannot be determined, 
+due to lack of reference.
+Euler angles and singularities are well described in \cite{diebel2006representing}. To avoid singularities
+of Euler angles, Unit quaternions can be used. Quaternions are mainly used for calculations, while Euler 
+angles are used to provide humanly readable values.
+
+\subsection{Ground Control Station}
+A software running on a ground computer, used for receiving in-flight information via telemetry from a UAV.
+It displays status and progress of mission, that often includes sensor or video data. It can also be used
+for sending commands up to the UAV during flight.
+
+Ground Control Station is often referred to as GCS.
+
+\section{Terabee TeraRanger Tower} \label{TerabeeDescription}
 TeraBee offers an off-the-shelf solid-state LIDAR system with the purpose of collision avoidance for drones.
-In their solution 8 sensors are positioned around a vertical axis with a controller board in the middle. 
-TeraRanger's interface is compatible with PixHawk 4 flight controller board and PX4 flight controller 
-software that makes integration easy.
+In their solution 8 sensors are evenly distributed around the vertical axis with a controller board in 
+the middle. TeraRanger's interface is compatible with Pixhawk 4 flight controller board and 
+PX4 flight controller software, that makes integration easy into systems based on these.
+
+\begin{figure}[!ht]
+    \centering
+    $\vcenter{\hbox{\includegraphics[width=80mm, keepaspectratio]{figures/tera_ranger_tower.png}}}$
+    $\vcenter{\hbox{\includegraphics[width=50mm, keepaspectratio]{figures/tera_ranger_tower_2.png}}}$
+    \caption{Terabee TeraRanger Tower Evo dimensions}
+    \label{fig:teraranger_dimensions}
+\end{figure}
 
 Each block of the array is a standalone LIDAR sensor, that can be used separately and supports different
 mount configurations. The company offers a long-range and fast-ranging version of these sensors, depending 
 on the type an update rate of 320 Hz can be achieved. The fact that system comes with a ROS package and a 
-2$^{\circ}$ field of view makes it a good candidate for indoor mapping in two dimensions. The price of this setup 
-starts from 599 euro. \cite{TerabeeTeraRanger}
-
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=50mm, keepaspectratio]{figures/tera_ranger_tower.png}\hspace{1cm}
-    \includegraphics[width=50mm, keepaspectratio]{figures/tera_ranger_tower_2.png}
-    \caption{Terabee TeraRanger Tower Evo dimensions}
-    \label{fig:teraranger_dimensions}
-\end{figure}
+2$^{\circ}$ field of view makes it a potential candidate for indoor mapping and positioning in two dimensions. 
+The price of this setup starts from 599 euro\cite{TerabeeTeraRanger}.
 
 \begin{table}[ht]
 	\footnotesize
@@ -29,7 +77,7 @@ starts from 599 euro. \cite{TerabeeTeraRanger}
 		\midrule
 		Range           & 0.5m up to 60m                            & 0.75m up to 8m \\
 		Update rate     & 120Hz/sensor                              & 320Hz/sensor\\
-		Field of View   & 2$^{\circ}$                                        & 2$^{\circ}$\\
+		Field of View   & 2$^{\circ}$                               & 2$^{\circ}$\\
 		Accuracy        & $\pm 4cm$ in the first 14m, 1.5\% above   & $\pm 12cm$\\
 		\bottomrule
 	\end{tabular}
@@ -37,6 +85,31 @@ starts from 599 euro. \cite{TerabeeTeraRanger}
 	\label{tab:tera_ranger_features}
 \end{table}
 
+Terabee provides a tutorial video on their website\cite{TerabeeTeraRanger} how to connect the 
+sensor array to a UAV that uses Pixhawk 4 flight controller and the process of configuration 
+in two different GCS programs. I have learned that PX4 flight stack supports lidar measurements
+for obstacle avoidance and it can be configured from a GCS program. It seems a reasonable choice 
+to integrate this feature into such product.
 
-\section{Crazyflie 2.0 Multi-ranger deck}
-\section{3D LIDAR SLAM Intergation with GPS/INS for UAVs in Urban GPS-Degraded Environments}
+\section{Crazyflie Multi-ranger deck}
+The company Bitcraze has developed a nano quadcopter for educational purposes. The current version is
+called Crazyflie 2.1 it measures only 92x92mm with a height of 29mm and a weight of 27g.
+Extra sensors and peripherals can be attached to the top of the quadcopter using extension boards.
+
+The extension board called Multi-ranger deck has 5 VL53L1X sensors facing forwards, backwards,
+left, right and up. This project is similar to the product of Terabee described in \ref{TerabeeDescription}, 
+but in a smaller size factor and significantly lower weight.
+
+An introduction video can be found on the product website \cite{BitcrazeMultirangerDeck}, where 
+a SLAM algorithm is used to create a map and localize the drone.
+
+\begin{figure}[!ht]
+    \centering
+    $\vcenter{\hbox{\includegraphics[width=60mm, keepaspectratio]{figures/multiranger_deck.jpg}}}$
+    $\vcenter{\hbox{\includegraphics[width=80mm, keepaspectratio]{figures/multiranger_slam.png}}}$
+    \caption{Crazyflie Multi-ranger deck, SLAM example project}
+    \label{fig:crazyflie_multiranger}
+\end{figure}
+
+
+\section{3D LIDAR SLAM Integration with GPS/INS for UAVs in Urban GPS-Degraded Environments}
