@@ -48,6 +48,41 @@ for sending commands up to the UAV during flight.
 
 Ground Control Station is often referred to as GCS.
 
+\section{3D LIDAR SLAM Integration with GPS/INS for UAVs in Urban GPS-Degraded Environments}
+This paper\cite{hening20173d} presents a data fusion algorithm for estimation of velocity and 
+position of a UAV in urban environments where GPS data is partly or completely blocked and is 
+unreliable. A LIDAR sensor provides local position updates using SLAM technique, GPS provides 
+corrections when available and an Internal Navigation System is used as an additional input to
+the Adaptive Extended Kalman filter. The outline of the filter can be seen on figure \ref{fig:haning_filter}
+
+\begin{figure}[!ht]
+    \centering
+	\includegraphics[width=100mm, keepaspectratio]{figures/hening_filter.png}
+    \caption{Schematic of LIDAR SLAM, GPS and IMU integration \cite{hening20173d}}
+    \label{fig:haning_filter}
+\end{figure}
+
+The LIDAR used for measurements is a Velodyne VLP-16, that has a vertical field of view of 30$^\circ$ with a 
+vertical resolution of 2$^\circ$. On the horizontal axis it's resolution is 0.1-0.4$^\circ$ and 
+rotation rate can be adjusted between 5-20Hz.
+
+The proposed filter is was capable of reducing the GPS drift of 24.3m and LIDAR error of 7.5m to 3.42m.
+This shows that fusing GPS, LIDAR and IMU measurements results in a much more accurate position estimate in
+GPS-degraded environments. The capabilities of the LIDAR was tested on even an even moon like surface, 
+with very few objects that can be detected by the sensor. In this case GPS data is much more accurate, than
+LIDAR SLAM results.
+
+\begin{figure}[!ht]
+    \centering
+	$\vcenter{\hbox{\includegraphics[width=80mm, keepaspectratio]{figures/hening_LIDARvsGPS.png}}}$
+	$\vcenter{\hbox{\includegraphics[width=50mm, keepaspectratio]{figures/hening_result.png}}}$
+    \caption{GPS, LIDAR and EKF position estimates and position drift after 405 meters\cite{hening20173d}}
+    \label{fig:lidar_slam_integration}
+\end{figure}
+
+
+
+
 \section{Terabee TeraRanger Tower} \label{TerabeeDescription}
 TeraBee offers an off-the-shelf solid-state LIDAR system with the purpose of collision avoidance for drones.
 In their solution 8 sensors are evenly distributed around the vertical axis with a controller board in 
@@ -92,16 +127,18 @@ for obstacle avoidance and it can be configured from a GCS program. It seems a r
 to integrate this feature into such product.
 
 \section{Crazyflie Multi-ranger deck}
-The company Bitcraze has developed a nano quadcopter for educational purposes. The current version is
-called Crazyflie 2.1 it measures only 92x92mm with a height of 29mm and a weight of 27g.
+The company Bitcraze has developed a mini quadcopter mainly for educational purposes. The current version is
+called Crazyflie 2.1 and measures only 92x92mm with a height of 29mm and a weighs 27g.
 Extra sensors and peripherals can be attached to the top of the quadcopter using extension boards.
 
-The extension board called Multi-ranger deck has 5 VL53L1X sensors facing forwards, backwards,
-left, right and up. This project is similar to the product of Terabee described in \ref{TerabeeDescription}, 
-but in a smaller size factor and significantly lower weight.
+The extension board called Multi-ranger deck has 5 VL53L1X sensors by STMicroelectronics facing forwards, 
+backwards, left, right and up. This project is similar to the product of Terabee described in \ref{TerabeeDescription}, 
+but in a smaller size factor and with significantly lower weight.
 
 An introduction video can be found on the product website \cite{BitcrazeMultirangerDeck}, where 
-a SLAM algorithm is used to create a map and localize the drone.
+a SLAM algorithm is used to create a map and localize the drone. This serves as a proof of concept,
+that static VL53L1X sensors can be used for mapping and positioning in two dimensions. The company provided 
+no information of the SLAM algorithm used or from the quality of the map.
 
 \begin{figure}[!ht]
     \centering
@@ -111,5 +148,3 @@ a SLAM algorithm is used to create a map and localize the drone.
     \label{fig:crazyflie_multiranger}
 \end{figure}
 
-
-\section{3D LIDAR SLAM Integration with GPS/INS for UAVs in Urban GPS-Degraded Environments}

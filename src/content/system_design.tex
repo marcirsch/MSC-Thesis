@@ -67,7 +67,7 @@ infrastructure needs and previous experience.
 
 \subsection{Reference measurements}
 %TODO Reference measurements
-TODO
+TODO ?
 
 \section{LIDAR layout design}
 As mentioned before, multiple aspects need to be taken into account when placing LIDAR sensors onto a
@@ -94,9 +94,9 @@ only 9$^{\circ}$ of dead zone.
 
 In this layout the scanning on the horizontal plane is done purely by evenly placing the sensors 
 around the vertical axis and doesn't take advantage of the movement of the drone during flights. 
-Especially turns around the vertical axis. The usage of 13 LIDAR sensors just for 2D scanning would mean a lot of overhead when 
-stepping up to 3D, so a more optimal solution needs to be found, that takes advantage of the movement 
-of the drone during turns and therefore uses fewer sensors. 
+Especially turns around the vertical axis. The usage of 13 LIDAR sensors just for 2D scanning would mean 
+a lot of overhead when stepping up to 3D, so a more optimal solution needs to be found, that takes
+advantage of the movement of the drone during turns and therefore uses fewer sensors. 
 
 The lower limit for the number of sensors is what can be seen on the solution of Bitcraze, 
 the Multi-ranger deck\cite{BitcrazeMultirangerDeck} uses 4 sensors on the horizontal plane facing forward, 
@@ -108,6 +108,8 @@ The layout for 3D SLAM depends on the experience gained during simulations of 2D
 the pitch and roll angle changes need to be taken into account too. These differ from vehicle to vehicle,
 faster drones can have a pitch of 30$^{\circ}$, but in indoor environment nor pitch nor roll will go above
 15$^{\circ}$. 
+
+TODO Basic layout to start simulation with
 
 \section{LIDAR data collection}
 On a real drone configuration of LIDAR sensors and measurement forwarding to ROS need to be solved. 
@@ -176,8 +178,10 @@ easier and the built system is clearer.
 \end{figure}
 
 
-
-\section{Data preprocessing}
+\section{Data processing}
+\subsection{Preprocessing}
 Convert measurements to quadcopter frame.
 
-\section{Google Cartographer 3D SLAM}
+\subsection{SLAM algorithms}
+
+\subsection{Google Cartographer}
