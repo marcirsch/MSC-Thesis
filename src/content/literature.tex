@@ -7,8 +7,6 @@ UAV is short for Unmanned Aerial Vehicle, in other words an airborne vehicle tha
 without having a pilot on board. Drone is a subset of UAV, a vehicle that is capable of autonomous flight.
 Usually UAV and the word Drone are used interchangeably in the literature, and it is used so in this thesis.
 
-
-
 \subsection{Body axes used in aviation}
 In aviation Euler angles are used to describe the orientation of an aircraft. Euler angles are three angles
 that describe the orientation of a rigid body with respect to a fixed coordinate system. These axes are 
@@ -48,14 +46,170 @@ for sending commands up to the UAV during flight.
 
 Ground Control Station is often referred to as GCS.
 
-\section{3D LIDAR SLAM Integration with GPS/INS for UAVs in Urban GPS-Degraded Environments}
-This paper\cite{hening20173d} presents a data fusion algorithm for estimation of velocity and 
+\subsection{Multicopters}
+Multicopter or Multirotor is a generic term to describe a UAV with more than two rotors. The term covers quadcopters,
+octocopters, hexicopters etc.
+
+Quadcopters are quickly gaining popularity thanks to the easy to use, commercially available drones that can be used
+for filming. Octocopters have eight rotors in total and mostly used by professional users. It provides a more stable 
+flight, can lift more weight and it is safer, because it can fly with any of the rotors damaged.
+
+\section{Simultaneous Localization And Mapping - SLAM}
+Simultaneous Localization And Mapping the computational problem that asks if it is possible to place a robot 
+in an unknown environment and for the robot to incrementally build a consistent map of this environment while 
+simultaneously determining its position. A good overview of SLAM is presented in\cite{durrant2006simultaneous} 
+and \cite{diebel2006representing} focusing a solution to the above proposed problem in general, with no dependency 
+of sensors to be used.
+
+\begin{figure}[!ht]
+    \centering
+	\includegraphics[width=80mm, keepaspectratio]{figures/slam_tutorial_basic_figure.png}
+    \caption{The essential SLAM problem presented in \cite{durrant2006simultaneous} }
+    \label{fig:slam_tutorial_basic}
+\end{figure}
+
+During SLAM process a robot is placed in an unknown location and it is capable of estimating its trajectory and 
+location of all landmarks online, without the need of priori knowledge of the location. The robot makes relative
+observations of its surroundings, a number of unknown landmarks using sensors as seen on figure \ref{fig:slam_tutorial_basic}.
+The following quantities are defined at a time instant \emph{k}:
+\begin{itemize}
+	\item $\mathbf{x}_{k}$: State vector describing the location and orientation of the robot
+	\item $\mathbf{u}_{k}$: Control vector, applied at \emph{k-1} and drove the robot to state $\mathbf{x}_{k}$ at time \emph{k}
+	\item $\mathbf{m}_i$: Landmark location vector. A time independent vector that describes the location of a static landmark
+	\item $\mathbf{z}_{ik}$: Observation taken from the robot to the \emph{i}th landmark at time \emph{k}
+	\item $\mathbf{X}_{0:k}=\left \{ \mathbf{x}_1,\mathbf{x}_2,\cdots,\mathbf{x}_k \right \}$ A set of all robot location vectors until time \emph{k}
+	\item $\mathbf{U}_{0:k}=\left \{ \mathbf{u}_1,\mathbf{u}_2,\cdots,\mathbf{u}_k \right \}$ A set of history of all control vectors until time \emph{k}
+	\item $\mathbf{m}=\left \{ \mathbf{m}_1,\mathbf{m}_2,\cdots,\mathbf{m}_n \right \}$ A set of all landmarks
+	\item $\mathbf{Z}_{0:k}=\left \{ \mathbf{z}_1,\mathbf{z}_2,\cdots,\mathbf{z}_k \right \}$: A set of all landmark observations until time \emph{k}
+\end{itemize}
+
+In probabilistic form of SLAM, the probability distribution function \ref{eq:slam_probability} needs to be computed for
+all times \emph{k}. In other words the current state vector and the landmark location probabilities need to be calculated
+based on all \emph{k} observations, control vectors and the initial state of the robot.
+
+\begin{equation} \label{eq:slam_probability}
+    P\left ( \mathbf{x}_{k},\mathbf{m}\mid \mathbf{Z}_{0:k},\mathbf{U}_{0:k},\mathbf{x}_{0}\right )
+\end{equation}
+
+A recursive solution is desirable for the SLAM problem. Starting with an estimate for the posteriori distribution 
+(equation \ref{eq:slam_probability_posteriori}) at time \emph{k}-1, then a control vector $\mathbf{u}_{k}$ is used to
+estimate the next state and observations using Bayes theorem. This calculation requires an observation model and a 
+state transition model.
+ 
+
+
+\begin{equation} \label{eq:slam_probability_posteriori}
+    P\left ( \mathbf{x}_{k-1},\mathbf{m}\mid \mathbf{Z}_{0:k-1},\mathbf{U}_{0:k-1},\mathbf{x}_{0}\right )
+\end{equation}
+
+The observation model \ref{eq:slam_observation_model} describes the probability of making an observation 
+$\mathbf{z}_{k}$ given the current robot and landmark locations.
+
+\begin{equation} \label{eq:slam_observation_model}
+    P\left ( \mathbf{z}_{k}\mid \mathbf{x}_{k},\mathbf{m} \right )
+\end{equation}
+
+The state transition model \ref{eq:slam_motion_model} describes the probability of the next position of the robot 
+based on the previous state and the control vector at time \emph{k}. The state transition is assumed to be a Markov
+process, so the next state $\mathbf{x}_{k}$ depends only on the current state $\mathbf{x}_{k-1}$ applied control 
+$\mathbf{u}_{k}$. $\mathbf{x}_{k}$ is also independent from both landmark locations $\mathbf{m}$ and observations
+$\mathbf{z}_{k}$.
+
+\begin{equation} \label{eq:slam_motion_model}
+    P\left ( \mathbf{x}_{k}\mid \mathbf{x}_{k-1},\mathbf{u}_{k} \right )
+\end{equation}
+
+Using equations \ref{eq:slam_probability_posteriori}, \ref{eq:slam_observation_model} and \ref{eq:slam_motion_model},
+the SLAM algorithm can now be described using a two-step recursive form: prediction and correction.
+The prediction step or time-update is used for estimating the next state and map, based on all posteriori observations,
+control vectors and initial state. 
+
+\begin{equation} \label{eq:slam_time_update}
+    P\left ( \mathbf{x}_{k}, \mathbf{m}\mid \mathbf{Z}_{0:k-1}, \mathbf{U}_{0:k}, \mathbf{x}_{0} \right )=
+        \int 
+            P\left ( \mathbf{x}_{k}\mid \mathbf{x}_{k-1}, \mathbf{u}_{k} \right ) 
+            \times  
+            P\left ( \mathbf{x}_{k-1}, \mathbf{m}  \mid  \mathbf{Z}_{0:k-1}, \mathbf{U}_{0:k-1}, \mathbf{x}_{0}\right )
+        d\mathbf{x}_{k-1}
+\end{equation}
+
+The measurement update provides a correction to the prediction state, using observations made at time \emph{k}.
+
+\begin{equation} \label{eq:slam_mesurement_update}
+    P\left ( \mathbf{x}_{k}, \mathbf{m} \mid \mathbf{Z}_{0:k}, \mathbf{U}_{0:k}, \mathbf{x}_{0} \right )= 
+    \frac
+        {P\left ( \mathbf{z}_{k}\mid \mathbf{x}_{k}, \mathbf{m} \right )P\left ( \mathbf{x}_{k}, \mathbf{m}\mid \mathbf{Z}_{0:k-1}, \mathbf{U}_{0:k}, \mathbf{x}_{0}\right ) }
+        {P\left ( \mathbf{z}_{k} \mid \mathbf{Z}_{0:k-1}, \mathbf{U}_{0:k}\right )}
+\end{equation}
+
+
+The localization problem can be solved with the assumption the map is known:
+
+\begin{equation} \label{eq:slam_localization_problem}
+    P\left ( \mathbf{x}_{k} \mid \mathbf{Z}_{0:k}, \mathbf{U}_{0:k}, \mathbf{m}\right )
+\end{equation}
+
+And the mapping problem can be solved with the assumption the location is known:
+
+\begin{equation} \label{eq:slam_mapping_problem}
+    P\left ( \mathbf{m} \mid \mathbf{X}_{0:k}, \mathbf{Z}_{0:k}, \mathbf{U}_{0:k}, \right )
+\end{equation}
+
+These problems introduced in \ref{eq:slam_localization_problem} and \ref{eq:slam_mapping_problem} are
+dependent on each other and need to be solves simultaneously. In the early stages of SLAM mapping and localization
+were tried to be solved independently and work often focused on either of them. Once the realization came that combined 
+mapping and localization can be formulated as a single estimation problem, the problem became convergent.
+
+Many solutions can be found for probabilistic SLAM problem, the most common is the use of the extended Kalman
+filter (EKF) that provides an optimal estimation to non-linear models with additive Gaussian noise. The motion
+model can also be represented with a non-Gaussian probability distribution, that leads to the use of the 
+Rao-Blackwellized particle filter, or FastSLAM algorithms.
+
+
+The above introduced SLAM problem was a general introduction, it is not dependent on the sensor used for observations.
+Many kind of observers can be used for this purpose, but the two main categories are visual or camera based and sensor based.
+Visual observers mostly use simple or special camera configurations for depth sensing, while sensor based observers 
+use some other technique or physical phenomena to measure distances like sonars or LIDARS.
+
+\subsection{Visual SLAM}
+Visual SLAM uses a simple camera or a modified camera that is capable of depth sensing. This technique is 
+similar to how humans and animals perceive and their surroundings. 
+
+In solutions where a single camera is used, called monocular camera, depth sensing is done by using the differences
+between consecutive images. 
+Two main categories of monocular techniques are feature-based and direct SLAM algorithms. Feature-based techniques detect
+certain key-points called features in images, like corners and edges, and only uses these feature to extract depth information.
+Direct SLAM algorithms use the image intensities to estimate the location and surroundings.
+LSD-SLAM proposed in \cite{engel2014lsd} is a good example for feature-based, while ORB-SLAM\cite{mur2015orb} uses direct SLAM 
+approach.
+
+The pro of using monocular camera for localization and mapping is that each image contains high density of information and
+cameras are cheap and popular.
+The drawback of using monocular camera based SLAM is that a single camera cannot detect the scale. This is referred to as
+scale-drift and often attempted to be fixed by trying to detect a scenery that has been previously scanned and therefore 
+drift can be corrected.
+
+Stereo camera or RGB-D cameras are also popular for Visual SLAM, these avoid the scale-drift that monocular cameras suffer
+from \cite{engel2015large}. 
+
+\subsection{LIDAR SLAM}
+Cameras are cheap and easily available, but they produce high amounts of data that demands high processing capabilities.
+Sensor based approaches produce lower amount of data that already contains depth information without the need for further 
+processing. 
+
+Ultrasonic sensors are easy to use for distance measuring, they are cheap and easy to use, but they suffer from significant
+measurement noise, because of background noise and the change of speed of sound. LIDAR sensors on the other hand 
+use light to measure distance, offer less noisy measurements, lower form factor, higher resolution and update rates. LIDAR 
+sensors are also significantly more expensive than most of ultrasonic sensors and camera based SLAM systems.
+
+
+The study of University of California\cite{hening20173d} presents a data fusion algorithm for estimation of velocity and 
 position of a UAV in urban environments where GPS data is partly or completely blocked and is 
 unreliable. A LIDAR sensor provides local position updates using SLAM technique, GPS provides 
 corrections when available and an Internal Navigation System is used as an additional input to
 the Adaptive Extended Kalman filter. The outline of the filter can be seen on figure \ref{fig:haning_filter}
 
-\begin{figure}[!ht]
+\begin{figure}[!hb]
     \centering
 	\includegraphics[width=100mm, keepaspectratio]{figures/hening_filter.png}
     \caption{Schematic of LIDAR SLAM, GPS and IMU integration \cite{hening20173d}}
@@ -66,11 +220,11 @@ The LIDAR used for measurements is a Velodyne VLP-16, that has a vertical field 
 vertical resolution of 2$^\circ$. On the horizontal axis it's resolution is 0.1-0.4$^\circ$ and 
 rotation rate can be adjusted between 5-20Hz.
 
-The proposed filter is was capable of reducing the GPS drift of 24.3m and LIDAR error of 7.5m to 3.42m.
-This shows that fusing GPS, LIDAR and IMU measurements results in a much more accurate position estimate in
-GPS-degraded environments. The capabilities of the LIDAR was tested on even an even moon like surface, 
-with very few objects that can be detected by the sensor. In this case GPS data is much more accurate, than
-LIDAR SLAM results.
+The proposed filter is was capable of reducing the GPS drift of 24.3m and LIDAR drift of 7.5m to 3.42m.
+This shows that fusing GPS, LIDAR and IMU measurements results in a more accurate position estimate in
+GPS-degraded environments. The capabilities of the LIDAR was tested on an even moon like surface, 
+with very few objects that can be used by the SLAM algorithm. In this case GPS data is much more 
+accurate, than LIDAR SLAM results.
 
 \begin{figure}[!ht]
     \centering
@@ -81,9 +235,11 @@ LIDAR SLAM results.
 \end{figure}
 
 
+\subsection{Cartographer SLAM}
 
+\section{Similar products available on the market} 
 
-\section{Terabee TeraRanger Tower} \label{TerabeeDescription}
+\subsection{Terabee TeraRanger Tower} \label{sect:TerabeeDescription}
 TeraBee offers an off-the-shelf solid-state LIDAR system with the purpose of collision avoidance for drones.
 In their solution 8 sensors are evenly distributed around the vertical axis with a controller board in 
 the middle. TeraRanger's interface is compatible with Pixhawk 4 flight controller board and 
@@ -126,13 +282,13 @@ in two different GCS programs. I have learned that PX4 flight stack supports lid
 for obstacle avoidance and it can be configured from a GCS program. It seems a reasonable choice 
 to integrate this feature into such product.
 
-\section{Crazyflie Multi-ranger deck}
+\subsection{Crazyflie Multi-ranger deck}
 The company Bitcraze has developed a mini quadcopter mainly for educational purposes. The current version is
 called Crazyflie 2.1 and measures only 92x92mm with a height of 29mm and a weighs 27g.
 Extra sensors and peripherals can be attached to the top of the quadcopter using extension boards.
 
 The extension board called Multi-ranger deck has 5 VL53L1X sensors by STMicroelectronics facing forwards, 
-backwards, left, right and up. This project is similar to the product of Terabee described in \ref{TerabeeDescription}, 
+backwards, left, right and up. This project is similar to the product of Terabee described in \ref{sect:TerabeeDescription}, 
 but in a smaller size factor and with significantly lower weight.
 
 An introduction video can be found on the product website \cite{BitcrazeMultirangerDeck}, where 

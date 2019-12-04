@@ -117,4 +117,23 @@ MAVROS is still needed to be run, because there are some messages that would not
 \end{figure}
 
 \section{QGroundControl}
-TODO QGroundControl description
+QGroundControl(QGC) is an open-source ground control station software, developed as a part of Dronecode. It provides
+full flight control and vehicle setup for PX4 and ArduPilot powered vehicles and for any flight controller that
+uses MAVLink communication protocol. It provides easy and straightforward usage for beginners, while delivering
+high end features for experienced users too.
+
+QGC is mainly used for flight controller setup and configuration. When setting up a PX4 autopilot based flight 
+controller, the controller needs to know the type of the vehicle and the frame that is used. Besides selecting 
+vehicle type, internal sensors need to be calibrated and telemetry messages need to be configured. Low level 
+parameters can also be adjusted and obstacle avoidance can also be setup here, as seen in the product of Terabee
+in \ref{sect:TerabeeDescription}, but even low level flight controller parameters can be changed.
+
+QGC can also be used for mission planning for autonomous flight and gives instant feedback of the progress of a 
+mission, by visualizing the drone on a map and major sensor data.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=130mm, keepaspectratio]{figures/qgc_start_screen.jpg}
+    \caption{QGroundControl main screen\cite{QGCWebpage}}
+    \label{fig:qgc_main_screen}
+\end{figure}
