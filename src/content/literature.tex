@@ -236,6 +236,52 @@ accurate, than LIDAR SLAM results.
 
 
 \subsection{Cartographer SLAM}
+Cartographer is a system developed by Google that provides real-time simultaneous localization and mapping
+in 2D and 3D across multiple platforms and sensor configurations. Cartographer is used by Google street view
+for internal mapping of building interiors, using a backpack mounted LIDAR scanner.
+
+There officially available SLAM packages in ROS, the two most popular packages are Gmapping and Cartographer.
+Gmapping package contains a ROS wrapper for OpenSlam's Gmapping that provides laser based SLAM as a ROS node. 
+Gmapping is limited to 2D map building, therefore it is not considered for this project.
+
+\begin{figure}[!ht]
+    \centering
+	\includegraphics[width=140mm, keepaspectratio]{figures/cartographer_example.png}
+    \caption{Cartographer SLAM example\cite{CartographerDocumentation}}
+    \label{fig:cartographer_slam_example}
+\end{figure}
+
+
+On the other hand Cartographer ROS package supports both 2D and 3D SLAM and has a great and active community.
+The overview of Cartographer is seen on figure \ref{fig:cartographer_slam_overview}. The core components are
+sensor inputs, Local SLAM and Global SLAM. On a higher abstraction the job of local SLAM is to build submaps
+and the job of global SLAM is to tie submaps the most consistently together.
+It is common to build submaps or local maps in SLAM implementations, because building a single map increases 
+complexity quadratically, but by using submaps the complexity can be limited to the contents of the submap.
+
+The most important input of Cartographer is the Range Data, depth information coming from LIDAR sensors. 
+The data is first pre-filtered, because some measurements are irrelevant the sensor might be directed to
+a part of the robot or it can be covered by dust. Some sensors set unsuccessful range measurements to a value
+that is significantly higher than the maximum range of the sensor. A bandpass filter is used for pre-filtering,
+that keeps the values in a predefined range. The minimum and maximum values need to be set according to 
+the sensor specifications. Close objects are very often hit by the LIDAR
+measurements and offer more points, however distant objects offer much less points. The Voxel filter 
+downsamples raw points where density is higher to reduce computation needed.
+
+Inertial Measurement Units (IMU) provide a direction of gravity vector and a noisy estimation of the robot's
+rotation. IMU data has to be provided for 3D SLAM because it greatly reduces complexity of scan matching,
+while IMU data is optional for 2D SLAM. Odometry Pose and Fixed Frame Pose are optional inputs of 
+Cartographer, that can further reduce complexity.
+
+
+\begin{figure}[!hb]
+    \centering
+	\includegraphics[width=140mm, keepaspectratio]{figures/cartographer_slam.png}
+    \caption{Cartographer SLAM overview\cite{CartographerDocumentation}}
+    \label{fig:cartographer_slam_overview}
+\end{figure}
+
+
 
 \section{Similar products available on the market} 
 
