@@ -172,59 +172,153 @@ Visual observers mostly use simple or special camera configurations for depth se
 use some other technique or physical phenomena to measure distances like sonars or LIDARS.
 
 \subsection{Visual SLAM}
-Visual SLAM uses a simple camera or a modified camera that is capable of depth sensing. This technique is 
-similar to how humans and animals perceive and their surroundings. 
+Visual SLAM is a subset of SLAM algorithms that processes camera images to determine the camera's position and orientation
+relative to its surroundings, while building a map of its environment. In the simplest case a monocular camera is used
+to collect images, but more advanced active or passive stereo cameras and RGB-D cameras are also used. A pro of using
+images for SLAM is that images contain high amounts of data, therefore very detailed maps can be made. On the other hand,
+processing big amounts of data means higher complexity and demands higher processing capabilities.
 
-In solutions where a single camera is used, called monocular camera, depth sensing is done by using the differences
-between consecutive images. 
-Two main categories of monocular techniques are feature-based and direct SLAM algorithms. Feature-based techniques detect
-certain key-points called features in images, like corners and edges, and only uses these feature to extract depth information.
-Direct SLAM algorithms use the image intensities to estimate the location and surroundings.
-LSD-SLAM proposed in \cite{engel2014lsd} is a good example for feature-based, while ORB-SLAM\cite{mur2015orb} uses direct SLAM 
-approach.
 
+Two main categories of visual techniques are feature-based and direct SLAM algorithms. Feature-based techniques detect
+certain key-points called features in images, like corners and edges, and only use these features to extract depth information.
+Direct SLAM algorithms however don't search for features, but use the image intensities to estimate the location and surroundings.
+Two popular visual SLAM methods are feature-based ORB-SLAM and direct LSD-SLAM.
+
+\subsubsection{Monocular camera}
 The pro of using monocular camera for localization and mapping is that each image contains high density of information and
-cameras are cheap and popular.
-The drawback of using monocular camera based SLAM is that a single camera cannot detect the scale. This is referred to as
-scale-drift and often attempted to be fixed by trying to detect a scenery that has been previously scanned and therefore 
-drift can be corrected.
+cameras will always be cheaper easier to use than other depth sensing camera rigs. 
+A big pro, but in the same time a big con of using a monocular camera for SLAM is that a single camera cannot detect the scale.
+It is an advantage, because the same camera can be used indoor on a small scale even down to centimeters, and used outdoors on
+a scale of kilometers. Nonetheless these during transmission between these scales, the scale can drift and therefore size of
+landmarks will not be presented correctly. This is called scale-drift, that algorithms try to compensate.
 
-Stereo camera or RGB-D cameras are also popular for Visual SLAM, these avoid the scale-drift that monocular cameras suffer
-from \cite{engel2015large}. 
+\begin{figure}[!ht]
+    \centering
+	\includegraphics[width=80mm, keepaspectratio]{figures/scale_drift_lsd_slam.png}
+    \caption{Scale drift and compensation illustration from \cite{Strasdat2010ScaleDL}}
+    \label{fig:scale_drift_lsd_slam}
+\end{figure}
 
-\subsection{LIDAR SLAM}
-Cameras are cheap and easily available, but they produce high amounts of data that demands high processing capabilities.
-Sensor based approaches produce lower amount of data that already contains depth information without the need for further 
-processing. 
+
+\subsubsection{Stereo camera}
+A stereo camera is a type of camera with typically two image sensors. Two image sensors mimic the human binocular vision and 
+makes depth perception possible. The two cameras are placed relatively close together so there is a high correlation between 
+the images taken by these cameras. To find correlations between the two images sufficient details and structure needs to be
+present on the images, therefore light conditions affect the performance of depth-sensing. This technique is also called
+passive stereo vision.
+
+Active stereo cameras solve this problem employing a projector onboard, that projects a structured light to simplify the 
+stereo matching problem. Using this technique the depth sensing performance is less affected by lighting conditions and 
+reoccurring patterns will not confuse the matching of the images.
+
+\begin{figure}[!ht]
+    \centering
+    $\vcenter{\hbox{\includegraphics[width=60mm, keepaspectratio]{figures/stereo_camera.jpg}}}$
+    $\vcenter{\hbox{\includegraphics[width=60mm, keepaspectratio]{figures/active_stereo_camera.jpg}}}$
+    \caption{Passive stereo camera on the left, concept of active stereo camera on the right }
+    \label{fig:stereo_camera}
+\end{figure}
+
+
+
+\subsubsection{LSD-SLAM}
+
+LSD-SLAM for monocular cameras were proposed in \cite{engel2014lsd} and for stereo or RGB-D cameras in \cite{engel2015large}.
+LSD stands for Large-Scale Direct SLAM and it can be seen by the name that it is a direct SLAM algorithm.
+The map of the surroundings is created based on keyframes that consists of three fields, a camera image, an inverse depth map
+and the variance of the inverse depth map. The solution of the problem proposed by SLAM is divided into three parts, tracking,
+depth map estimation and map optimization as seen on figure \ref{fig:lsd_slam_overview}.
+
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=150mm, keepaspectratio]{figures/lsd_slam_overview.png}
+    \caption{LSD-SLAM overview of the complete algorithm \cite{engel2014lsd}}
+    \label{fig:lsd_slam_overview}
+\end{figure}
+
+New images are input during the tracking phase and the position is estimated with respect to the current keyframe from 
+previous iteration. The depth map estimation component uses tracked frames to either refine or replace the current keyframe.
+If the camera has moved more than a set threshold, a new keyframe is initialized with the combination of current and new 
+keyframe. If the tracked keyframe is not taken, then it is used to refine the current keyframe by filtering over many per-pixel,
+performing small-baseline stereo comparisons and regularization of the depth map. Once the current keyframe is updated, it is 
+built into the global map, by the map optimization.
+Keyframes that are close to each other can be detected and closed, this process is called loop-closure. For loop closures and
+scale-drift compensation, similarity transform is used. The map is further optimized using using pose graph optimization from 
+g2p package.
+
+\subsubsection{ORB-SLAM}
+ORB-SLAM is a feature-based SLAM algorithm introduced in \cite{mur2015orb}. The features extracted are represented by ORBs,
+therefore the name of the algorithm. ORB-SLAM has three threads that run in parallel: tracking, local mapping and 
+loop closing.
+
+The tracking phase is responsible for localizing the camera and to decide when to insert a new keyframe.
+The features extracted from the new image are FAST corners, where FAST is a computationally efficient process to find corners
+on images. These corners are described using ORB, that is a method to describe FAST corners by a center of mass and
+an orientation parameter. This way the place and orientation is known of each feature.The initial pose is estimated using 
+a constant velocity model and if the tracking is lost relocation is done instead of pose estimation.
+Track local map is a map of keyframes that share a common map point. Finally it is decided if new keyframe is need to be
+created.
+
+
+\begin{figure}[!hb]
+    \centering
+    \includegraphics[width=150mm, keepaspectratio]{figures/orb_slam_overview.png}
+    \caption{ORB-SLAM overview \cite{mur2015orb}}
+    \label{fig:orb_slam_overview}
+\end{figure}
+
+
+In the first step of local mapping the new keyframe is inserted into the co-visibility graph and it is linked keyframe to keyframe
+with the most points in common. ORB features from the connected keyframes are used to calculate new map points using triangulation. 
+Unmatched ORBs are compared with other unmatched ORBs of other keyframes. Projection error and consistency is checked, then the 
+map is projected to the matched keyframes. The new map points need to be validated, by going through a test to increase the 
+likelihood that these map points are valid part of the map. In local bundle adjustment step the current keyframe and connected
+keyframes through the co-visibility graph are optimized. Finally abundant keyframes get discarded to keep simplicity.
+
+Loop closing is quite effective in ORB-SLAM, because matching ORBs can be done with relatively high confidence. Similarity 
+transformation is calculated.
+
+\subsection{Ranging sensor based SLAM}
+Cameras are cheap, popular and can be used to create highly detailed maps, but they produce high amounts of data that demands 
+high processing capabilities. Sensor based approaches produce lower amount of data that is dependent on the scale, sensors have
+a minimum and maximum range they can be used on.
 
 Ultrasonic sensors are easy to use for distance measuring, they are cheap and easy to use, but they suffer from significant
-measurement noise, because of background noise and the change of speed of sound. LIDAR sensors on the other hand 
+measurement noise, because of background noise and the variability of speed of sound. LIDAR sensors on the other hand 
 use light to measure distance, offer less noisy measurements, lower form factor, higher resolution and update rates. LIDAR 
 sensors are also significantly more expensive than most of ultrasonic sensors and camera based SLAM systems.
 
+Planar laser scanner is a LIDAR sensor that is extended to make distance measurements in 2D. Typically it is used for 
+scanning the horizontal plane. Usually the scanning is solved by rotating a LIDAR sensor in 360$^\circ$ while it is 
+making measurements evenly on the plane. Planar scanners are good for building floor maps and navigating in indoor 
+environments. Some scanners are further extended for 3D scanning.
 
-The study of University of California\cite{hening20173d} presents a data fusion algorithm for estimation of velocity and 
-position of a UAV in urban environments where GPS data is partly or completely blocked and is 
-unreliable. A LIDAR sensor provides local position updates using SLAM technique, GPS provides 
-corrections when available and an Internal Navigation System is used as an additional input to
-the Adaptive Extended Kalman filter. The outline of the filter can be seen on figure \ref{fig:haning_filter}
 
-\begin{figure}[!hb]
+\subsubsection{3D LIDAR SLAM to improve localization accuracy}
+
+The study of University of California\cite{hening20173d} presents an algorithm that fuses LIDAR, IMU and GPS signals 
+to have a more accurate estimation of the absolute position and velocity of a UAV. The LIDAR scanner provides local position
+updates using SLAM technique, GPS provides corrections when available and an Internal Navigation System is used as an 
+additional input to the Adaptive Extended Kalman filter. The outline of the filter can be seen on figure \ref{fig:haning_filter}
+
+\begin{figure}[!ht]
     \centering
 	\includegraphics[width=100mm, keepaspectratio]{figures/hening_filter.png}
     \caption{Schematic of LIDAR SLAM, GPS and IMU integration \cite{hening20173d}}
     \label{fig:haning_filter}
 \end{figure}
 
-The LIDAR used for measurements is a Velodyne VLP-16, that has a vertical field of view of 30$^\circ$ with a 
-vertical resolution of 2$^\circ$. On the horizontal axis it's resolution is 0.1-0.4$^\circ$ and 
-rotation rate can be adjusted between 5-20Hz.
+The 3D LIDAR scanner used is Velodyne VLP-16, that has a vertical field of view of 30$^\circ$ with a vertical resolution 
+of 2$^\circ$. On the horizontal axis the resolution is 0.1-0.4$^\circ$ and rotation rate can be adjusted between 5-20Hz.
+The sensor weighs 830g according to the website.
 
+During the experiment an octocopter is used to carry the sensor. Octocopters are stable and can carry high amounts of weight.
 The proposed filter is was capable of reducing the GPS drift of 24.3m and LIDAR drift of 7.5m to 3.42m.
 This shows that fusing GPS, LIDAR and IMU measurements results in a more accurate position estimate in
-GPS-degraded environments. The capabilities of the LIDAR was tested on an even moon like surface, 
-with very few objects that can be used by the SLAM algorithm. In this case GPS data is much more 
-accurate, than LIDAR SLAM results.
+GPS-degraded environments. The capabilities of the LIDAR was also tested on an even moon like surface, 
+with very few landmarks that can be used by the SLAM algorithm. In this case GPS data is much more 
+accurate than LIDAR SLAM, therefore LIDAR data is not used for calculation of position updates.
 
 \begin{figure}[!ht]
     \centering
@@ -233,6 +327,12 @@ accurate, than LIDAR SLAM results.
     \caption{GPS, LIDAR and EKF position estimates and position drift after 405 meters\cite{hening20173d}}
     \label{fig:lidar_slam_integration}
 \end{figure}
+
+
+\subsubsection{3D LIDAR SLAM for mapping}
+
+
+
 
 
 \subsection{Cartographer SLAM}
