@@ -284,34 +284,27 @@ Cameras are cheap, popular and can be used to create highly detailed maps, but t
 high processing capabilities. Sensor based approaches produce lower amount of data that is dependent on the scale, sensors have
 a minimum and maximum range they can be used on.
 
-Ultrasonic sensors are easy to use for distance measuring, they are cheap and easy to use, but they suffer from significant
+Ultrasonic sensors are easy to use for distance measurements, they are cheap and easy to use, but they suffer from significant
 measurement noise, because of background noise and the variability of speed of sound. LIDAR sensors on the other hand 
-use light to measure distance, offer less noisy measurements, lower form factor, higher resolution and update rates. LIDAR 
+use light to measure distance, offer more accurate measurements, typically lower form factor, higher resolution and update rates. LIDAR 
 sensors are also significantly more expensive than most of ultrasonic sensors and camera based SLAM systems.
 
-Planar laser scanner is a LIDAR sensor that is extended to make distance measurements in 2D. Typically it is used for 
+A planar laser scanner is a LIDAR sensor that is extended to make distance measurements in 2D. Typically it is used for 
 scanning the horizontal plane. Usually the scanning is solved by rotating a LIDAR sensor in 360$^\circ$ while it is 
-making measurements evenly on the plane. Planar scanners are good for building floor maps and navigating in indoor 
+making measurements evenly distributed on the plane. Planar scanners are good for building floor maps and navigating in indoor 
 environments. Some scanners are further extended for 3D scanning.
 
 
-\subsubsection{3D LIDAR SLAM to improve localization accuracy}
+\subsubsection{3D LIDAR SLAM to improve localization accuracy} \label{lidar_for_localization}
 
 The study of University of California\cite{hening20173d} presents an algorithm that fuses LIDAR, IMU and GPS signals 
 to have a more accurate estimation of the absolute position and velocity of a UAV. The LIDAR scanner provides local position
 updates using SLAM technique, GPS provides corrections when available and an Internal Navigation System is used as an 
-additional input to the Adaptive Extended Kalman filter. The outline of the filter can be seen on figure \ref{fig:haning_filter}
-
-\begin{figure}[!ht]
-    \centering
-	\includegraphics[width=100mm, keepaspectratio]{figures/hening_filter.png}
-    \caption{Schematic of LIDAR SLAM, GPS and IMU integration \cite{hening20173d}}
-    \label{fig:haning_filter}
-\end{figure}
+additional input to the Adaptive Extended Kalman filter. The outline of the filter can be seen on figure \ref{fig:haning_filter}.
 
 The 3D LIDAR scanner used is Velodyne VLP-16, that has a vertical field of view of 30$^\circ$ with a vertical resolution 
 of 2$^\circ$. On the horizontal axis the resolution is 0.1-0.4$^\circ$ and rotation rate can be adjusted between 5-20Hz.
-The sensor weighs 830g according to the website.
+The sensor weighs 830g according to the company website.
 
 During the experiment an octocopter is used to carry the sensor. Octocopters are stable and can carry high amounts of weight.
 The proposed filter is was capable of reducing the GPS drift of 24.3m and LIDAR drift of 7.5m to 3.42m.
@@ -319,6 +312,13 @@ This shows that fusing GPS, LIDAR and IMU measurements results in a more accurat
 GPS-degraded environments. The capabilities of the LIDAR was also tested on an even moon like surface, 
 with very few landmarks that can be used by the SLAM algorithm. In this case GPS data is much more 
 accurate than LIDAR SLAM, therefore LIDAR data is not used for calculation of position updates.
+
+\begin{figure}[!ht]
+    \centering
+	\includegraphics[width=100mm, keepaspectratio]{figures/hening_filter.png}
+    \caption{3D LiDAR SLAM Integration with GPS/INS for UAVs in Urban GPS-Degraded Environments \cite{hening20173d} - algorithm overview}
+    \label{fig:haning_filter}
+\end{figure}
 
 \begin{figure}[!ht]
     \centering
@@ -330,6 +330,32 @@ accurate than LIDAR SLAM, therefore LIDAR data is not used for calculation of po
 
 
 \subsubsection{3D LIDAR SLAM for mapping}
+The solution seen in \ref{lidar_for_localization} uses a LIDAR scanner to improve position and velocity data, by fusing the output 
+of SLAM algorithm with others. The map created simultaneously is not used in this solution. 3D LIDAR data and SLAM can be also used 
+to create highly detailed maps. The paper, presented by David Droeschel and Sven Behnke \cite{droeschel2018efficient}, discusses
+an efficient implementation of SLAM with focus on improving online mapping quality.
+
+\begin{figure}[!ht]
+    \centering
+	\includegraphics[width=140mm, keepaspectratio]{figures/droeschel_overview.png}
+    \caption{Efficient Continuous-time SLAM for 3D LIDAR-based online mapping\cite{droeschel2018efficient} - algorithm overview}
+    \label{fig:3d_lidar_mapping_overview}
+\end{figure}
+
+\begin{figure}
+    \centering
+    $\vcenter{\hbox{\includegraphics[width=80mm, keepaspectratio]{figures/3d_slam_gridmap.png}}}$
+	$\vcenter{\hbox{\includegraphics[width=50mm, keepaspectratio]{figures/3d_slam_gridmap.png}}}$
+    \caption{Grid-map presented in \cite{droeschel2014local} on the left, ... on the right} 
+    \label{fig:3d_lidar_mapping_figures}
+\end{figure}
+
+The system first aggregates range measurements into a robot-centric grid-map \cite{droeschel2014local}, that has high resolution
+in the close proximity and lower resolution with increasing distance. A grid cell stores the cell's occupancy probability and a
+surface element(surfel), that describes the mean of samples and covariance. IMU or odometry measurements are used to account for 
+motion of the sensor during acquisition, to compensate rolling shutter artifacts. After the preprocessing step, local maps are 
+updated 
+
 
 
 
