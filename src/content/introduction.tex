@@ -3,9 +3,59 @@
 %----------------------------------------------------------------------------
 
 
+% A bevezető tartalmazza a diplomaterv-kiírás elemzését, történelmi előzményeit, a feladat indokoltságát
+%  (a motiváció leírását), az eddigi megoldásokat, és ennek tükrében a hallgató megoldásának összefoglalását.
+
+% A bevezető szokás szerint a diplomaterv felépítésével záródik, azaz annak rövid leírásával, hogy melyik fejezet mivel foglalkozik.
 
 
-A bevezető tartalmazza a diplomaterv-kiírás elemzését, történelmi előzményeit, a feladat indokoltságát
- (a motiváció leírását), az eddigi megoldásokat, és ennek tükrében a hallgató megoldásának összefoglalását.
+A prerequisite for future expansion of mobile robots is the ability to navigate autonomously and safely in their ever-changing
+environment without collision. The positioning of drones in ad hoc indoor environment where no infrastructure is available is 
+needed to fulfill this prerequisite. To know the position of a robot in an unknown environment, the robot needs to build a map
+if its surroundings so its position can be referenced. Mapping and positioning were considered as two separate problems 
+at first and research focused on either of them, but the solution to these problems separately proved to be divergent. Only 
+by considering these two problems together and finding solutions simultaneously, it became convergent 
+\cite{durrant2006simultaneous}. This process is referred to as Simultaneous Localization And Mapping (SLAM).
 
-A bevezető szokás szerint a diplomaterv felépítésével záródik, azaz annak rövid leírásával, hogy melyik fejezet mivel foglalkozik.
+The proposed issue by SLAM has many solutions depending on the use-case. SLAM technique can be used to with a 
+focus on improving localization accuracy in GPS degraded environments, by fusing the outputs of a SLAM algorithm with GPS and
+IMU data \cite{hening20173d}. Or as presented in \cite{droeschel2018efficient}, the solution focuses on building highly accurate maps
+of building interiors or even outdoors online, but as a byproduct position becomes more accurate as well. The above mentioned 
+papers present a mapping approach that uses industrial-grade hexacopter and octocopter and the same precise LIDAR scanner that can
+measure up to 100m. 
+
+Localization and mapping of the environment for a small quadcopters can be challenging, because adding any extra equipment means
+extra weight that shortens flight time and changes flight behavior. Adding the above mentioned 3D LIDAR scanner that weighs 830g
+to a quadcopter that is under 1kg means significant extra weight and the drone might turn out to be uncapable of flying. These
+scanners use LIDAR sensors spinning around the horizontal axis to provide ranging measurements on 360$^\circ$. The
+stepper motor used for spinning the sensors that could also affect the flight behavior, because a spinning weight acts like a 
+gyroscope. Monocular, stereo or RGB-D cameras can be placed even on small aerial vehicles and therefore offer a great solution.
+These visual sensors however produce higher amount of data by magnitudes, but still needs to be considered for such purposes,
+because highly detailed maps can be created by using them.
+
+By using stationary 1D LIDAR sensors placed around the quadcopter, these unwanted effects can be eliminated and the weight of 
+extra equipment can be kept significantly lower, than using a 3D LIDAR scanner discussed before. The sensors need to be placed
+in a layout that offers an optimal scan of the environment, therefore the movements of quadcopter during flight needs to be 
+taken into account to be able to scan the environment around the vehicle.
+
+In this thesis the design of a 3D positioning and mapping system is being discussed, that uses stationary 1D LIDAR sensors to 
+acquire distance measurements from an Unmanned Aerial Vehicle's (UAV) surrounding and uses SLAM technique to map its 
+surrounding, estimate its position and velocity. The goal is to provide a lightweight hardware and software alternative to 
+accurate planar LIDAR scanners, that are too heavy both computationally and physically for a UAV under 1kg. The focus during 
+the design is on the quality of the map and accuracy of the position estimates.
+
+In chapter \ref{chap:literature_review} basic aviation terminologies are introduced that will be used in the thesis, followed
+by introduction of SLAM techniques and similar products on the market. Visual SLAM techniques describe the use of monocular 
+cameras, stereo cameras or RGB-D cameras to be used for data acquisition, while ORB-SLAM and LSD-SLAM are two popular SLAM
+techniques for processing data coming from these sensors. Ranging sensors are non-visual sensors that can use sound
+or light to measure distance, like ultrasonic sensors or LIDAR sensors. Two interesting researches are discussed, that use 
+LIDAR scanners to improve position or map quality online. Cartographer SLAM is a is a software package that will be used
+for the first prototypes and to evaluate layout design of the stationary sensors, because it has compatibility with ROS
+system.
+
+In chapter \ref{chap:simulation} software components and their interaction is discussed, that will be used for future 
+simulations. Simulations help to evaluate sensors, layout designs and SLAM algorithms without the need to build the system
+physically.
+
+The last chapter \ref{chap:system_design} gives an overview of the chosen LIDAR sensor for the first prototype, first designs 
+of the layout of stationary sensors and a unit for collection of measurements from the sensors.

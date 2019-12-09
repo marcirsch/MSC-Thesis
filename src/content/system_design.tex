@@ -1,9 +1,9 @@
-\chapter{System design}
+\chapter{System design} \label{chap:system_design}
 In this chapter I'm introducing the initial design of the above mentioned system from both hardware and
 software aspects. Since there are several unknown factors 
 during this phase, the designs described in this chapter are presented as initial designs. The actual
 system design will be based on the experience gained during several trial-and-error based iterations
-in simulations.
+in the simulator.
 
 Multiple aspects need to be taken into account to determine the number and the placement of the LIDAR sensors.
 The specifications of the LIDAR and the characteristics of SLAM algorithms also drive these aspects. 
@@ -27,7 +27,7 @@ independent from the autopilot board or a combination of these two.
 
 \section{Pixhawk 4}
 Pixhawk 4 is an advanced autopilot designed by the collaboration of Holybro and PX4 team \cite{Pixhawk4Website}. 
-It is optimized to run the official PX4 flight stack. Because of its modular-, open-design and open-source 
+It is optimized to run the official PX4 flight stack. Because of its modular, open-design and open-source 
 firmware, it is a good choice for rapid development and academic purposes. Its modularity comes from the 
 connectors on the top of the device that are used to supply power for the board, output PWM signal for 
 the motors and to add peripherals like GPS antenna, telemetry or integrate custom devices using available
@@ -51,7 +51,7 @@ avalanche diode) receiving array with a field of view of 27$^{\circ}$. The modul
 processing on a built in low power microcontroller that frees up the host processor from these tasks.
 The sensor according to the datasheet is capable of 50Hz ranging frequency and up to 400cm distance 
 measurements. The laser receiving array's size can be programmatically changed by setting 
-region-of-interest(ROI) size. This way the sensor provides multizone operation and a higher resolution than
+region-of-interest(ROI) size. This way the sensor provides multizone operation and a higher resolution, than
 by using the whole SPAD array.
 
 \begin{figure}[ht]
@@ -80,7 +80,7 @@ sensor needs to be used, with more suitable parameters.
 To have the best possible layout without overlapping scans, 360$^{\circ}$ of the horizontal plane 
 needs to be covered by the field of view of the LIDAR sensors. The field of view of VL53L1X is 27$^{\circ}$,
 so altogether 13 sensors are needed to cover 97.5\% of the plane, with 27.69$^{\circ}$ in between, leaving
-only 9$^{\circ}$ of dead zone.
+only 9$^{\circ}$ of uncovered zone.
 
 \begin{figure}[ht]
     \centering
@@ -90,8 +90,8 @@ only 9$^{\circ}$ of dead zone.
 \end{figure}
 
 In this layout the scanning on the horizontal plane is done purely by evenly placing the sensors 
-around the vertical axis and doesn't take advantage of the movement of the drone during flights. 
-Especially turns around the vertical axis. The usage of 13 LIDAR sensors just for 2D scanning would mean 
+around the vertical axis and doesn't take advantage of the movement of the drone during flights, especially 
+turns around the yaw axis. The usage of 13 LIDAR sensors just for 2D scanning would mean 
 a lot of overhead when stepping up to 3D, so a more optimal solution needs to be found, that takes
 advantage of the movement of the drone during turns and therefore uses fewer sensors. 
 
@@ -130,7 +130,7 @@ besides many other tasks. If these control loops are delayed by other processes,
 cause instable flight or even crash.
 
 Because of lack of deep understanding of PX4 firmware, to make sure that timing of control loops 
-are untouched, I decided to build a standalone data collector device. A dedicated microcontroller that
+are untouched, I decided to build a standalone data collector device, using a dedicated microcontroller that
 handles I2C communication with the LIDAR sensors and writes data to an SD card using SPI protocol.
 
 \subsection{Standalone data collector design}
@@ -154,21 +154,23 @@ Sensors on different I2C buses can have the same address, therefore the same 5 a
 in each group. Shutdown pin of sensors sharing the same addresses can be common, this way number of
 wires needed for shutdown is reduced from 20 to 5.
 
-Handling 20 interrupt lines can be overwhelming for any CPU, while bringing little or no extra
-benefit. Using only one interrupt line per group is enough to signal the microcontroller that 
-measurements are ready to be read out in all sensors in that group. Interrupt pins are active-low,
-so to produce the group interrupt signal a NOR gate needs to be used. When the state of all interrupt
-pins are low, group interrupt signal will become logical 1 and 0 otherwise.
-
-In the simplified design seen on figure \ref{fig:data_collector} only 17 wires are leaving
-the microcontroller, while no functionality is lost. This solution also makes software development
-easier and the built system is clearer.
-
-
 \begin{figure}[ht]
     \centering
     \includegraphics[width=100mm, keepaspectratio]{figures/data_collector.png}
     \caption{Design of data collector}
     \label{fig:data_collector}
 \end{figure}
+
+Handling 20 interrupt lines can be overwhelming for any CPU, while bringing little or no extra
+benefit. Using only one interrupt line per group is enough to signal the microcontroller that 
+measurements are ready to be read out in all sensors in that group. Interrupt pins are active-low,
+so to produce the group interrupt signal a NOR gate needs to be used. When the state of all interrupt
+pins are low, group interrupt signal will become logical 1 and 0 otherwise.
+
+In the simplified design seen on figure \ref{fig:data_collector} only 17 wires are connected to
+the microcontroller, while no functionality is lost. This solution also makes software development
+easier and the built system is clearer.
+
+
+
 

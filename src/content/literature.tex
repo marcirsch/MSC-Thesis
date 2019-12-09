@@ -1,4 +1,4 @@
-\chapter{Literature review}
+\chapter{Literature review} \label{chap:literature_review}
 
 \section{Basic aviation terminologies}
 
@@ -10,8 +10,8 @@ Usually UAV and the word Drone are used interchangeably in the literature, and i
 \subsection{Body axes used in aviation}
 In aviation Euler angles are used to describe the orientation of an aircraft. Euler angles are three angles
 that describe the orientation of a rigid body with respect to a fixed coordinate system. These axes are 
-referred to as Yaw, Pitch and Roll. Rotation around these axes are Yaw, Pitch 
-and Roll angles respectively. All three angles follow the right-hand rule. 
+referred to as Yaw, Pitch and Roll. Rotation around these axes are called Yaw, Pitch and Roll angles respectively.
+All three angles follow the right-hand rule. 
 
 Magnetic north is used as reference for Yaw, so an angle of 0$^\circ$ or 360$^\circ$ means that the vehicle
 is heading North, 90$^\circ$ means it's heading East. Yaw is sometimes called Heading.
@@ -29,7 +29,7 @@ Pitch and Roll angles are calculated in reference to the horizontal plane. The n
 plane is used for the calculations, and it is the norm of the gravity vector. It is favorable to use the gravity
 vector, because its direction can be measured using an accelerometer. Both Roll and Pitch angles are measured
 from -90$^\circ$ to 90$^\circ$. A Pitch of 90$^\circ$ is straight up and 0$^\circ$ is Horizon. If an aircraft
-flies with 0$^\circ$ Roll angle, the vehicle is horizontal. On the other hand a 90$^\circ$ Roll angle means
+flies with 0$^\circ$ Roll angle, the vehicle is horizontal, on the other hand a 90$^\circ$ Roll angle means
 the vehicle is turning right and is perpendicular to the horizon. Pitch is sometimes referred to as Tilt.
 
 The limitation of using Euler angles is reached when Pitch or Roll angles approach 90$^\circ$, because in this 
@@ -48,18 +48,18 @@ Ground Control Station is often referred to as GCS.
 
 \subsection{Multicopters}
 Multicopter or Multirotor is a generic term to describe a UAV with more than two rotors. The term covers quadcopters,
-octocopters, hexicopters etc.
+octocopters, hexacopters etc.
 
-Quadcopters are quickly gaining popularity thanks to the easy to use, commercially available drones that can be used
-for filming. Octocopters have eight rotors in total and mostly used by professional users. It provides a more stable 
+Quadcopters are quickly gaining popularity thanks to their easy usability, and because of commercially available drones 
+that can be used for filming. Octocopters have eight rotors in total and mostly used by professionals. It provides a more stable 
 flight, can lift more weight and it is safer, because it can fly with any of the rotors damaged.
 
 \section{Simultaneous Localization And Mapping - SLAM}
-Simultaneous Localization And Mapping the computational problem that asks if it is possible to place a robot 
+Simultaneous Localization And Mapping is the computational problem that asks if it is possible to place a robot 
 in an unknown environment and for the robot to incrementally build a consistent map of this environment while 
 simultaneously determining its position. A good overview of SLAM is presented in\cite{durrant2006simultaneous} 
-and \cite{diebel2006representing} focusing a solution to the above proposed problem in general, with no dependency 
-of sensors to be used.
+and \cite{diebel2006representing} focusing on finding a solution to the above proposed problem in general, with no dependency 
+on the type of sensor to be used.
 
 \begin{figure}[!ht]
     \centering
@@ -68,7 +68,7 @@ of sensors to be used.
     \label{fig:slam_tutorial_basic}
 \end{figure}
 
-During SLAM process a robot is placed in an unknown location and it is capable of estimating its trajectory and 
+During SLAM a robot is placed in an unknown location and it is capable of estimating its trajectory and 
 location of all landmarks online, without the need of priori knowledge of the location. The robot makes relative
 observations of its surroundings, a number of unknown landmarks using sensors as seen on figure \ref{fig:slam_tutorial_basic}.
 The following quantities are defined at a time instant \emph{k}:
@@ -167,9 +167,9 @@ Rao-Blackwellized particle filter, or FastSLAM algorithms.
 
 
 The above introduced SLAM problem was a general introduction, it is not dependent on the sensor used for observations.
-Many kind of observers can be used for this purpose, but the two main categories are visual or camera based and sensor based.
-Visual observers mostly use simple or special camera configurations for depth sensing, while sensor based observers 
-use some other technique or physical phenomena to measure distances like sonars or LIDARS.
+Many kind of observers can be used for this purpose, but the two main categories are camera based and ranging sensor based.
+Visual observers mostly use simple or special camera configurations for depth sensing, while ranging sensor based observers 
+use a physical phenomena to measure distances like sonars or LIDARS.
 
 \subsection{Visual SLAM}
 Visual SLAM is a subset of SLAM algorithms that processes camera images to determine the camera's position and orientation
@@ -181,15 +181,15 @@ processing big amounts of data means higher complexity and demands higher proces
 
 Two main categories of visual techniques are feature-based and direct SLAM algorithms. Feature-based techniques detect
 certain key-points called features in images, like corners and edges, and only use these features to extract depth information.
-Direct SLAM algorithms however don't search for features, but use the image intensities to estimate the location and surroundings.
-Two popular visual SLAM methods are feature-based ORB-SLAM and direct LSD-SLAM.
+Direct SLAM algorithms however don't search for features, but use the regions of high intensities on the image to estimate the 
+location and surroundings. Two popular visual SLAM methods are feature-based ORB-SLAM and direct LSD-SLAM.
 
 \subsubsection{Monocular camera}
 The pro of using monocular camera for localization and mapping is that each image contains high density of information and
 cameras will always be cheaper easier to use than other depth sensing camera rigs. 
 A big pro, but in the same time a big con of using a monocular camera for SLAM is that a single camera cannot detect the scale.
 It is an advantage, because the same camera can be used indoor on a small scale even down to centimeters, and used outdoors on
-a scale of kilometers. Nonetheless these during transmission between these scales, the scale can drift and therefore size of
+a scale of kilometers. Nonetheless during transmission between these scales, the scale can drift and therefore size of
 landmarks will not be presented correctly. This is called scale-drift, that algorithms try to compensate.
 
 \begin{figure}[!ht]
@@ -226,7 +226,7 @@ reoccurring patterns will not confuse the matching of the images.
 LSD-SLAM for monocular cameras were proposed in \cite{engel2014lsd} and for stereo or RGB-D cameras in \cite{engel2015large}.
 LSD stands for Large-Scale Direct SLAM and it can be seen by the name that it is a direct SLAM algorithm.
 The map of the surroundings is created based on keyframes that consists of three fields, a camera image, an inverse depth map
-and the variance of the inverse depth map. The solution of the problem proposed by SLAM is divided into three parts, tracking,
+and the variance of the inverse depth map. The solution of the problem proposed by SLAM is divided into three parts: tracking,
 depth map estimation and map optimization as seen on figure \ref{fig:lsd_slam_overview}.
 
 
@@ -240,12 +240,12 @@ depth map estimation and map optimization as seen on figure \ref{fig:lsd_slam_ov
 New images are input during the tracking phase and the position is estimated with respect to the current keyframe from 
 previous iteration. The depth map estimation component uses tracked frames to either refine or replace the current keyframe.
 If the camera has moved more than a set threshold, a new keyframe is initialized with the combination of current and new 
-keyframe. If the tracked keyframe is not taken, then it is used to refine the current keyframe by filtering over many per-pixel,
-performing small-baseline stereo comparisons and regularization of the depth map. Once the current keyframe is updated, it is 
-built into the global map, by the map optimization.
+keyframe. If the tracked keyframe is not taken, then it is used to refine the current keyframe by performing small-baseline 
+stereo comparisons and regularization of the depth map. Once the current keyframe is updated, it is built into the global map,
+by the map optimization.
 Keyframes that are close to each other can be detected and closed, this process is called loop-closure. For loop closures and
 scale-drift compensation, similarity transform is used. The map is further optimized using using pose graph optimization from 
-g2p package.
+g2o package.
 
 \subsubsection{ORB-SLAM}
 ORB-SLAM is a feature-based SLAM algorithm introduced in \cite{mur2015orb}. The features extracted are represented by ORBs,
@@ -255,8 +255,8 @@ loop closing.
 The tracking phase is responsible for localizing the camera and to decide when to insert a new keyframe.
 The features extracted from the new image are FAST corners, where FAST is a computationally efficient process to find corners
 on images. These corners are described using ORB, that is a method to describe FAST corners by a center of mass and
-an orientation parameter. This way the place and orientation is known of each feature.The initial pose is estimated using 
-a constant velocity model and if the tracking is lost relocation is done instead of pose estimation.
+an orientation parameter. This way the place and orientation is known of each feature. The initial pose is estimated using 
+a constant velocity model and if the tracking is lost, relocation is done instead of pose estimation.
 Track local map is a map of keyframes that share a common map point. Finally it is decided if new keyframe is need to be
 created.
 
@@ -273,21 +273,22 @@ In the first step of local mapping the new keyframe is inserted into the co-visi
 with the most points in common. ORB features from the connected keyframes are used to calculate new map points using triangulation. 
 Unmatched ORBs are compared with other unmatched ORBs of other keyframes. Projection error and consistency is checked, then the 
 map is projected to the matched keyframes. The new map points need to be validated, by going through a test to increase the 
-likelihood that these map points are valid part of the map. In local bundle adjustment step the current keyframe and connected
+likelihood that these map points are valid part of the map. In local bundle adjustment step, the current keyframe and connected
 keyframes through the co-visibility graph are optimized. Finally abundant keyframes get discarded to keep simplicity.
 
-Loop closing is quite effective in ORB-SLAM, because matching ORBs can be done with relatively high confidence. Similarity 
-transformation is calculated.
+Loop closing is quite effective in ORB-SLAM, because matching ORBs can be done with relatively high confidence.
+Similarity transformation is calculated.
 
 \subsection{Ranging sensor based SLAM}
 Cameras are cheap, popular and can be used to create highly detailed maps, but they produce high amounts of data that demands 
-high processing capabilities. Sensor based approaches produce lower amount of data that is dependent on the scale, sensors have
-a minimum and maximum range they can be used on.
+high processing capabilities. Ranging sensor based approaches produce lower amount of data that is dependent on the scale, these 
+sensors have a minimum and maximum range they can measure in between.
 
-Ultrasonic sensors are easy to use for distance measurements, they are cheap and easy to use, but they suffer from significant
-measurement noise, because of background noise and the variability of speed of sound. LIDAR sensors on the other hand 
-use light to measure distance, offer more accurate measurements, typically lower form factor, higher resolution and update rates. LIDAR 
-sensors are also significantly more expensive than most of ultrasonic sensors and camera based SLAM systems.
+Ultrasonic sensors have been used for distance measurements for many years, but they suffer from significant
+measurement noise, that comes from background noise and the variability of speed of sound. Almost no development has been seen on
+ultrasonic sensors in the previous years LIDAR sensors on the other hand are actively developed, because this technique
+uses light to measure distance, offer more accurate measurements, typically lower form factor, higher resolution and update rates. 
+LIDAR sensors are also significantly more expensive than most of ultrasonic sensors and camera based SLAM systems.
 
 A planar laser scanner is a LIDAR sensor that is extended to make distance measurements in 2D. Typically it is used for 
 scanning the horizontal plane. Usually the scanning is solved by rotating a LIDAR sensor in 360$^\circ$ while it is 
@@ -298,27 +299,30 @@ environments. Some scanners are further extended for 3D scanning.
 \subsubsection{3D LIDAR SLAM to improve localization accuracy} \label{lidar_for_localization}
 
 The study of University of California\cite{hening20173d} presents an algorithm that fuses LIDAR, IMU and GPS signals 
-to have a more accurate estimation of the absolute position and velocity of a UAV. The LIDAR scanner provides local position
-updates using SLAM technique, GPS provides corrections when available and an Internal Navigation System is used as an 
-additional input to the Adaptive Extended Kalman filter. The outline of the filter can be seen on figure \ref{fig:haning_filter}.
-
-The 3D LIDAR scanner used is Velodyne VLP-16, that has a vertical field of view of 30$^\circ$ with a vertical resolution 
-of 2$^\circ$. On the horizontal axis the resolution is 0.1-0.4$^\circ$ and rotation rate can be adjusted between 5-20Hz.
-The sensor weighs 830g according to the company website.
-
-During the experiment an octocopter is used to carry the sensor. Octocopters are stable and can carry high amounts of weight.
-The proposed filter is was capable of reducing the GPS drift of 24.3m and LIDAR drift of 7.5m to 3.42m.
-This shows that fusing GPS, LIDAR and IMU measurements results in a more accurate position estimate in
-GPS-degraded environments. The capabilities of the LIDAR was also tested on an even moon like surface, 
-with very few landmarks that can be used by the SLAM algorithm. In this case GPS data is much more 
-accurate than LIDAR SLAM, therefore LIDAR data is not used for calculation of position updates.
-
+to have a more accurate estimation of the absolute position and velocity of a UAV. 
 \begin{figure}[!ht]
     \centering
 	\includegraphics[width=100mm, keepaspectratio]{figures/hening_filter.png}
     \caption{3D LiDAR SLAM Integration with GPS/INS for UAVs in Urban GPS-Degraded Environments \cite{hening20173d} - algorithm overview}
     \label{fig:haning_filter}
 \end{figure}
+The LIDAR scanner provides local position updates using SLAM technique, GPS provides corrections when available and an Internal
+Navigation System is used as an additional input to the Adaptive Extended Kalman filter. The outline of the filter can be seen 
+on figure \ref{fig:haning_filter}.
+
+
+
+The 3D LIDAR scanner used is Velodyne VLP-16, that has a vertical field of view of 30$^\circ$ with a vertical resolution 
+of 2$^\circ$. On the horizontal axis the resolution is 0.1-0.4$^\circ$ and rotation rate can be adjusted between 5-20Hz.
+The sensor weighs 830g according to the company website.
+
+During the experiment an octocopter is used to carry the sensor. Octocopters are stable and can carry high amounts of weight.
+The proposed filter is capable of reducing the GPS drift of 24.3m and LIDAR drift of 7.5m to 3.42m.
+This shows that fusing GPS, LIDAR and IMU measurements result in a more accurate position estimate in
+GPS-degraded environments. The capabilities of the LIDAR was also tested on an even moon-like surface, 
+with very few landmarks that can be used by the SLAM algorithm. In this case GPS data is much more 
+accurate than LIDAR SLAM, therefore LIDAR data is not used for calculation of position updates in these cases.
+
 
 \begin{figure}[!ht]
     \centering
@@ -331,8 +335,8 @@ accurate than LIDAR SLAM, therefore LIDAR data is not used for calculation of po
 
 \subsubsection{3D LIDAR SLAM for mapping}
 The solution seen in \ref{lidar_for_localization} uses a LIDAR scanner to improve position and velocity data, by fusing the output 
-of SLAM algorithm with others. The map created simultaneously is not used in this solution. 3D LIDAR data and SLAM can be also used 
-to create highly detailed maps. The paper, presented by David Droeschel and Sven Behnke \cite{droeschel2018efficient}, discusses
+of SLAM algorithm with sensors. The map created simultaneously is not used in that solution. 3D LIDAR data and SLAM can be also used 
+to create highly detailed maps and this paper presented by David Droeschel and Sven Behnke \cite{droeschel2018efficient}, discusses
 an efficient implementation of SLAM with focus on improving online mapping quality.
 
 \begin{figure}[!ht]
@@ -342,69 +346,85 @@ an efficient implementation of SLAM with focus on improving online mapping quali
     \label{fig:3d_lidar_mapping_overview}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[!ht]
     \centering
     $\vcenter{\hbox{\includegraphics[width=80mm, keepaspectratio]{figures/3d_slam_gridmap.png}}}$
-	$\vcenter{\hbox{\includegraphics[width=50mm, keepaspectratio]{figures/3d_slam_gridmap.png}}}$
-    \caption{Grid-map presented in \cite{droeschel2014local} on the left, ... on the right} 
+	$\vcenter{\hbox{\includegraphics[width=50mm, keepaspectratio]{figures/3d_slam_map.png}}}$
+    \caption{Grid-map presented in \cite{droeschel2014local} on the left, estimated trajectory and built map on the right} 
     \label{fig:3d_lidar_mapping_figures}
 \end{figure}
 
 The system first aggregates range measurements into a robot-centric grid-map \cite{droeschel2014local}, that has high resolution
 in the close proximity and lower resolution with increasing distance. A grid cell stores the cell's occupancy probability and a
 surface element(surfel), that describes the mean of samples and covariance. IMU or odometry measurements are used to account for 
-motion of the sensor during acquisition, to compensate rolling shutter artifacts. After the preprocessing step, local maps are 
-updated 
+motion of the sensor during acquisition, to compensate rolling shutter artifacts. After the preprocessing step, surfels become 
+registered and the local map is updated. The older local map measurements are overwritten with the current 3D scan. During 
+allocentric mapping phase, the 3D local multiresolution maps from different view poses are aligned with each other using surfel
+based registration. Local maps that are registered to the SLAM graph are subject to refinement. During these steps, the scans 
+are refined based on available local maps, then graph and sensor trajectories are also refined. Local mapping, allocentric mapping
+and refinement phases are independent from each other, so these can run parallel.
 
-
-
-
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=150mm, keepaspectratio]{figures/3d_slam_example.png}
+    \caption{Comparison of maps with and without refinement\cite{droeschel2018efficient}} 
+    \label{fig:3d_lidar_mapping_example}
+\end{figure}
 
 
 \subsection{Cartographer SLAM}
 Cartographer is a system developed by Google that provides real-time simultaneous localization and mapping
 in 2D and 3D across multiple platforms and sensor configurations. Cartographer is used by Google street view
-for internal mapping of building interiors, using a backpack mounted LIDAR scanner.
+for mapping of building interiors, using a backpack mounted LIDAR scanner.
 
-There officially available SLAM packages in ROS, the two most popular packages are Gmapping and Cartographer.
+There are officially available SLAM packages in ROS, the most popular packages are Gmapping, Cartographer and Hector SLAM.
 Gmapping package contains a ROS wrapper for OpenSlam's Gmapping that provides laser based SLAM as a ROS node. 
-Gmapping is limited to 2D map building, therefore it is not considered for this project.
+Gmapping and Hector SLAM are limited to 2D map building, therefore these are not considered for this project.
+
+\begin{figure}[!ht]
+    \centering
+	\includegraphics[width=140mm, keepaspectratio]{figures/cartographer_slam.png}
+    \caption{Cartographer SLAM overview\cite{CartographerDocumentation}}
+    \label{fig:cartographer_slam_overview}
+\end{figure}
+
+
+
+On the other hand Cartographer ROS package supports both 2D and 3D SLAM and has a great and active community. The overview 
+of Cartographer is seen on figure \ref{fig:cartographer_slam_overview}. The core components are sensor inputs, Local SLAM
+and Global SLAM. On a higher abstraction the job of local SLAM is to build submaps and the job of global SLAM is to tie 
+submaps the most consistently together. It is common to build submaps or local maps in SLAM implementations, because by 
+updating the whole map increases complexity quadratically, but by using local maps or submaps the complexity can be limited
+to the contents of the submap that is preferable during online processing. In this case alignment of submaps needs to be solved,
+but it requires less processing and it can be run in parallel.
+
+The most important input of Cartographer is the Range Data, range measurements coming from LIDAR sensors. The data is first 
+pre-filtered, because some measurements are irrelevant, the sensor might be directed to a part of the robot or it can be covered
+by dust, and some sensors set unsuccessful range measurements to a value that is significantly higher than the maximum range of 
+the sensor. These outliers need to be filtered and Cartographer uses a bandpass filter for pre-filtering, that keeps the values
+in a predefined range. The minimum and maximum values need to be set according to the sensor specifications. 
+
+Close objects are very often hit by the LIDAR measurements and offer more points, however distant objects offer much less points.
+The Voxel filter down-samples raw points where density is higher, but leaves scarce measurements to reduce computation needed,
+while keeping data integrity.
+
+Inertial Measurement Units (IMU) provide a direction of gravity vector and a noisy estimation of the robot's movement. IMU data
+has to be provided for 3D SLAM because it greatly reduces complexity of scan matching, while IMU data is optional for 2D SLAM.
+Odometry Pose and Fixed Frame Pose are optional inputs of Cartographer, that can further reduce complexity.
+
+In Local SLAM phase, first scans are inserted into a submap at the best estimated position and scan matching is done only on
+submap and recent scan. During this process the error of pose estimates accumulate in the world frame. To reduce the accumulated
+error, pose optimization is run regularly. All finished submaps are considered for loop closure, that happens on a background 
+thread Global SLAM.
+
+
+
 
 \begin{figure}[!ht]
     \centering
 	\includegraphics[width=140mm, keepaspectratio]{figures/cartographer_example.png}
     \caption{Cartographer SLAM example\cite{CartographerDocumentation}}
     \label{fig:cartographer_slam_example}
-\end{figure}
-
-
-On the other hand Cartographer ROS package supports both 2D and 3D SLAM and has a great and active community.
-The overview of Cartographer is seen on figure \ref{fig:cartographer_slam_overview}. The core components are
-sensor inputs, Local SLAM and Global SLAM. On a higher abstraction the job of local SLAM is to build submaps
-and the job of global SLAM is to tie submaps the most consistently together.
-It is common to build submaps or local maps in SLAM implementations, because building a single map increases 
-complexity quadratically, but by using submaps the complexity can be limited to the contents of the submap.
-
-The most important input of Cartographer is the Range Data, depth information coming from LIDAR sensors. 
-The data is first pre-filtered, because some measurements are irrelevant the sensor might be directed to
-a part of the robot or it can be covered by dust. Some sensors set unsuccessful range measurements to a value
-that is significantly higher than the maximum range of the sensor. A bandpass filter is used for pre-filtering,
-that keeps the values in a predefined range. The minimum and maximum values need to be set according to 
-the sensor specifications. Close objects are very often hit by the LIDAR
-measurements and offer more points, however distant objects offer much less points. The Voxel filter 
-downsamples raw points where density is higher to reduce computation needed.
-
-Inertial Measurement Units (IMU) provide a direction of gravity vector and a noisy estimation of the robot's
-rotation. IMU data has to be provided for 3D SLAM because it greatly reduces complexity of scan matching,
-while IMU data is optional for 2D SLAM. Odometry Pose and Fixed Frame Pose are optional inputs of 
-Cartographer, that can further reduce complexity.
-
-
-\begin{figure}[!hb]
-    \centering
-	\includegraphics[width=140mm, keepaspectratio]{figures/cartographer_slam.png}
-    \caption{Cartographer SLAM overview\cite{CartographerDocumentation}}
-    \label{fig:cartographer_slam_overview}
 \end{figure}
 
 
@@ -415,7 +435,7 @@ Cartographer, that can further reduce complexity.
 TeraBee offers an off-the-shelf solid-state LIDAR system with the purpose of collision avoidance for drones.
 In their solution 8 sensors are evenly distributed around the vertical axis with a controller board in 
 the middle. TeraRanger's interface is compatible with Pixhawk 4 flight controller board and 
-PX4 flight controller software, that makes integration easy into systems based on these.
+PX4 flight controller software, that makes integration easy into systems based on these components.
 
 \begin{figure}[!ht]
     \centering
@@ -426,7 +446,7 @@ PX4 flight controller software, that makes integration easy into systems based o
 \end{figure}
 
 Each block of the array is a standalone LIDAR sensor, that can be used separately and supports different
-mount configurations. The company offers a long-range and fast-ranging version of these sensors, depending 
+mount configurations. The company offers a long-range and fast-ranging version of these sensors and depending 
 on the type an update rate of 320 Hz can be achieved. The fact that system comes with a ROS package and a 
 2$^{\circ}$ field of view makes it a potential candidate for indoor mapping and positioning in two dimensions. 
 The price of this setup starts from 599 euro\cite{TerabeeTeraRanger}.
@@ -465,13 +485,13 @@ but in a smaller size factor and with significantly lower weight.
 
 An introduction video can be found on the product website \cite{BitcrazeMultirangerDeck}, where 
 a SLAM algorithm is used to create a map and localize the drone. This serves as a proof of concept,
-that static VL53L1X sensors can be used for mapping and positioning in two dimensions. The company provided 
+that stationary VL53L1X sensors can be used for mapping and positioning in two dimensions. The company provided 
 no information of the SLAM algorithm used or from the quality of the map.
-
-\begin{figure}[!ht]
+\newpage
+\begin{figure}[h]
     \centering
-    $\vcenter{\hbox{\includegraphics[width=60mm, keepaspectratio]{figures/multiranger_deck.jpg}}}$
-    $\vcenter{\hbox{\includegraphics[width=80mm, keepaspectratio]{figures/multiranger_slam.png}}}$
+    \includegraphics[width=60mm, keepaspectratio]{figures/multiranger_deck.jpg}
+    \includegraphics[width=80mm, keepaspectratio]{figures/multiranger_slam.png}
     \caption{Crazyflie Multi-ranger deck, SLAM example project}
     \label{fig:crazyflie_multiranger}
 \end{figure}

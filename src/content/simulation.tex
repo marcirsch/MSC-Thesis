@@ -1,4 +1,4 @@
-\chapter{Simulation}
+\chapter{Simulation} \label{chap:simulation}
 Before actually building the system and experimenting on an expensive quadcopter in real world environment,
 it is cheaper, safer and easier to do tests in a simulated environment. 
 
@@ -76,7 +76,7 @@ foundation working on open-source projects to achieve standardization of drones.
 The core component of PX4 is the flight stack or flight controller that controls the motors based on sensor
 measurements and executes commands received from ground control. Besides the flight stack the repository 
 also contains Gazebo simulation files of multiple vehicles and an extensive \verb|Makefile| that makes 
-starting simulations relatively easy. 
+starting all components of the simulations relatively easy. 
 
 \subsection{PX4 simulation using MAVROS}
 The logical units of the simulation can be seen on figure \ref{fig:px4_sitl_simulation}.
@@ -101,19 +101,26 @@ Drone models are described using SDF files that are XML based and by modifying t
 be added. Gazebo loads the selected vehicle and the sensors, but if a selected sensor is not supported by
 PX4, its measurements will not be forwarded to MAVROS and therefore to ROS topics. It can be troublesome 
 to always use sensors that are supported by the flight controller, not to mention that the MAVLink protocol 
-is designed for small messages so the bandwidth can be too low in some cases. Luckily Gazebo can 
+is designed for small messages so the bandwidth can be low in some cases. Luckily Gazebo can 
 be started with a ROS wrapper and therefore all sensors can be accessed on ROS topics. However this technique
 cannot be used on a real drone with the original PX4 firmware, because it purely relies on MAVLink messages, 
 but for simulation purposes it's an elegant solution. This modified overview of the units used for simulation
-and a screenshot of an Iris drone simulated in Gazebo can be seen on figure \ref{fig:px4_sitl_ros_wrapper}. 
+and a screenshot of an Iris drone simulated in Gazebo can be seen on figure \ref{fig:px4_sitl_ros_wrapper} and 
+\ref{fig:px4_sitl_iris}. 
 MAVROS is still needed to be run, because there are some messages that would not be published to ROS otherwise.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=140mm, keepaspectratio]{figures/px4_sitl_with_ros.png}
-    \includegraphics[width=140mm]{figures/iris_gazebo.png}
-    \caption{PX4 Simulation using Gazebo with ROS wrapper}
+    \caption{PX4 Simulation logical unit overview using Gazebo with ROS wrapper}
     \label{fig:px4_sitl_ros_wrapper}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=140mm]{figures/iris_gazebo.png}
+    \caption{Iris drone in gazebo}
+    \label{fig:px4_sitl_iris}
 \end{figure}
 
 \section{QGroundControl}
