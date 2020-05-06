@@ -17,23 +17,21 @@ at first and research focused on either of them, but the solution to these probl
 by considering these two problems together and finding solutions simultaneously, it became convergent 
 \cite{durrant2006simultaneous}. This process is referred to as Simultaneous Localization And Mapping (SLAM).
 
-The proposed issue by SLAM has many solutions depending on the use-case. SLAM technique can be used to with a 
+The proposed issue by SLAM has many solutions depending on the use-case. SLAM technique can be used with a 
 focus on improving localization accuracy in GPS degraded environments, by fusing the outputs of a SLAM algorithm with GPS and
 IMU data \cite{hening20173d}. Or as presented in \cite{droeschel2018efficient}, the solution focuses on building highly accurate maps
-of building interiors or even outdoors online, but as a byproduct position becomes more accurate as well. The above mentioned 
+online of building interiors or even outdoors, but as a byproduct position becomes more accurate as well. The above mentioned 
 papers present a mapping approach that uses industrial-grade hexacopter and octocopter and the same precise LIDAR scanner that can
 measure up to 100m. 
 
 Localization and mapping of the environment for a small quadcopters can be challenging, because adding any extra equipment means
-extra weight that shortens flight time and changes flight behavior. Adding the above mentioned 3D LIDAR scanner that weighs 830g
-to a quadcopter that is under 1kg means significant extra weight and the drone might turn out to be uncapable of flying. These
-scanners use LIDAR sensors spinning around the horizontal axis to provide ranging measurements on 360$^\circ$. The
-stepper motor used for spinning the sensors that could also affect the flight behavior, because a spinning weight acts like a 
-gyroscope. Monocular, stereo or RGB-D cameras can be placed even on small aerial vehicles and therefore offer a great solution.
-These visual sensors however produce higher amount of data by magnitudes, but still needs to be considered for such purposes,
-because highly detailed maps can be created by using them.
+extra weight that shortens flight time and changes flight behavior and the onboard computation capacity is limited. Rotating planar 
+scanners, that are also used in the above mentioned papers, undoubtedly provide highly accurate scans and therefore highly detailed maps.
+These LIDAR scanners are perfect for professional use and require reliably octo- or hexacopters to carry. 
+The popular Velodyne VLP-16 for example weighs 830g. Adding it to a quadcopter that is under 1kg means significant extra weight and the 
+drone might turn out to be uncapable of flying. 
 
-By using stationary 1D LIDAR sensors placed around the quadcopter, these unwanted effects can be eliminated and the weight of 
+By using stationary LIDAR sensors placed around the quadcopter, these unwanted effects can be eliminated and the weight of 
 extra equipment can be kept significantly lower, than using a 3D LIDAR scanner discussed before. The sensors need to be placed
 in a layout that offers an optimal scan of the environment, therefore the movements of quadcopter during flight needs to be 
 taken into account to be able to scan the environment around the vehicle.

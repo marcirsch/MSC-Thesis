@@ -412,10 +412,10 @@ Inertial Measurement Units (IMU) provide a direction of gravity vector and a noi
 has to be provided for 3D SLAM because it greatly reduces complexity of scan matching, while IMU data is optional for 2D SLAM.
 Odometry Pose and Fixed Frame Pose are optional inputs of Cartographer, that can further reduce complexity.
 
-In Local SLAM phase, first scans are inserted into a submap at the best estimated position and scan matching is done only on
-submap and recent scan. During this process the error of pose estimates accumulate in the world frame. To reduce the accumulated
-error, pose optimization is run regularly. All finished submaps are considered for loop closure, that happens on a background 
-thread Global SLAM.
+In Local SLAM phase, first scans are inserted into a submap at the best estimated position. Scan matching is done only against
+current submap and not against the global map. During this process the error of pose estimates accumulate in the world frame. 
+To reduce the accumulated error over time, pose optimization is run regularly. All finished submaps are considered for loop 
+closure, that happens on a background thread Global SLAM.
 
 
 
@@ -496,3 +496,7 @@ no information of the SLAM algorithm used or from the quality of the map.
     \label{fig:crazyflie_multiranger}
 \end{figure}
 
+
+
+\subsection{Skydio 2}
+\subsection{Velodyne Velobit}

@@ -1,99 +1,51 @@
-\chapter{System design plan} \label{chap:system_design}
-In this chapter I'm introducing the planned steps towards building the previously described system. Due to the 
-COVID-19 outbreak I have no access to the university laboratory when writing this thesis and therefore the planned 
-system cannot be built physically. 
+\chapter{For future use} \label{chap:future_use}
 
-\section{VL53L1X measurements} \label{sect:vl53l1x_measurements}
-In order to simulate the chosen VL53L1X sensor accurately, experience needs to be gained using the device. 
-There are several factors that affect the quality of the map produced by the SLAM algorithm. Choosing the right
-settings for the LIDAR sensor therefore is a crucial part that cannot be determined independently from the SLAM 
-algorithm. At this point it is unsure if lower resolution and lower distance but higher sampling rate is beneficial 
-for SLAM algorithm or the other way around. My approach is to first explore the capabilities of the sensor in 
-all relevant operating modes, measure the ranging performance like update rate, maximum ranging distance and 
-noise level of the measurements. Later on the optimal operating mode can be chosen based on the SLAM performance. 
 
-The sensor has three parameters, that affect the ranging performance and require tuning for each application. 
-These three parameters are the distance preset, the timing budget and the Region of Interest(ROI). The device 
-has three different distance presets for short, medium and long distance ranging. The second parameter is the
-timing budget, that basically sets how much time is available for the sensor to complete a range. Bigger 
-timing budget means more accurate measurement, but on the downside it lowers the sampling rate.
+% \chapter{System design} \label{chap:system_design}
+In this chapter I'm introducing the initial design of the above mentioned system from both hardware and
+software aspects. Since there are several unknown factors 
+during this phase, the designs described in this chapter are presented as initial designs. The actual
+system design will be based on the experience gained during several trial-and-error based iterations
+in the simulator.
 
-\begin{figure}[ht]
+Multiple aspects need to be taken into account to determine the number and the placement of the LIDAR sensors.
+The specifications of the LIDAR and the characteristics of SLAM algorithms also drive these aspects. 
+Higher sampling rate can be achieved by placing multiple sensors close to each other in a way that 
+their scanned trajectories overlap. The resolution needed by the chosen SLAM algorithm also affects 
+the number and placement of the sensors, the resolution can be increased by programmatically narrowing
+down the field of view of the LIDAR.
+
+Quadcopters have a natural tendency to increase their pitch and roll angles when moving around 
+on the horizontal plane. By determining the characteristic pitch and roll angles during an indoor flight,
+the placement of the sensors can be refined. This way fewer LIDARs are needed for scanning the
+whole range. Using fewer sensors is beneficial, it reduces complexity in hardware and software too.
+While during simulations we don't need to worry about physically attaching the sensors on the frame or even
+supplying power to them, in a real implementation these might be limiting factors.
+
+On a real drone LIDAR measurements cannot be sent straight to ROS topics, because a low level communication needs
+to be established to configure and read out measurements from the sensors. There needs to be a device that 
+handles communication with the sensor and forwards messages to ROS topics.
+This device can be the Pixhawk 4 autopilot board using a custom firmware or a custom built hardware 
+independent from the autopilot board or a combination of these two.
+
+\section{Pixhawk 4}
+Pixhawk 4 is an advanced autopilot designed by the collaboration of Holybro and PX4 team \cite{Pixhawk4Website}. 
+It is optimized to run the official PX4 flight stack. Because of its modular, open-design and open-source 
+firmware, it is a good choice for rapid development and academic purposes. Its modularity comes from the 
+connectors on the top of the device that are used to supply power for the board, output PWM signal for 
+the motors and to add peripherals like GPS antenna, telemetry or integrate custom devices using available
+bus connectors. 
+
+When moving to real world applications, the PX4 SITL flight stack seen on the most left block on figures
+\ref{fig:px4_sitl_simulation} and \ref{fig:px4_sitl_ros_wrapper}, is to be replaced by the Pixhawk 4 board.
+
+\begin{figure}[h]
     \centering
-    \includegraphics[width=90mm, keepaspectratio]{figures/vl53l1x_roi_setup.png}
-    \caption{VL53L1X Region of Interest setting \cite{VL53L1XApplicationNote}}
-    \label{fig:vl53l1x_roi_setup}
+    \includegraphics[width=25mm, keepaspectratio]{figures/pixhawk4.jpg}\hspace{0cm}
+    \includegraphics[width=50mm, keepaspectratio]{figures/pixhawk4_2.jpg}
+    \caption{Pixhawk 4 advanced autopilot}
+    \label{fig:px4_sitl_ros_wrapper}
 \end{figure}
-
-As described in section \ref{sect:vl53l1x_intro} the sensor has a configurable SPAD array that can be used to 
-narrow down the field of view to a specific region. This region in the datasheet is called Region of Interest
-and will be further referenced to as ROI. By lowering the size of the ROI and changing its position, scanning 
-can be achieved resulting in a higher resolution up to 4x4. Increased resolution means smaller receiving array 
-that lowers sensitivity and maximum distance that can be measured. Scanning also requires more time because 
-each ROI can take time up to the timing budget.
-
-\subsection{Selected operating modes}
-To have a better overview how these parameters affect the ranging performance, a number of operating modes 
-have been chosen for testing. Each operating mode is a group of three parameters that are the distance preset
-timing budget and the resolution. The performance of an operating mode is measured by the update rate, maximum 
-ranging distance and standard deviation on a given distance.
-
-According to the VL53L1X datasheet, the 4m maximum distance can only be achieved in long preset, 3m in medium 
-and 1.3m in short. The datasheet contains a plot for maximum distance, standard deviation vs timing budget
-in long ranging preset with ROI set to maximum size. The timing budgets in the datasheet are 33ms, 
-140ms and 200ms, therefore I have selected these timings for test measurements. 
-
-As an additional setup an operating mode with the highest update rate has been selected, because update rate is
-expected to improve SLAM performance. This can be achieved by using an inter-measurement period of 20ms and 
-timing budget of 18.5ms, but only in short range preset and ROI size set to maximum. The estimated highest 
-update rate using this operating mode is 50Hz.
-
-As seen on figure \ref{fig:vl53l1x_timing_budget} that the sensor provides measurements with a standard deviation
-under 5mm, but it's not mentioned how the accuracy changes by lowering the ROI size. To investigate the 
-performance of ranging measurements using lower ROI size, four Region of Interest scan patterns have been selected.
-The regions are selected evenly on the SPAD array to provide 1x1, 2x2, 3x3, 4x4 resolution output. These setups 
-have been selected, because this way the regions do not overlap. The sensor would be capable of more complex 
-patterns or even changing the resolution between scans, but these setups should provide a good understanding 
-of the sensor and the effects on the SLAM performance.
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=140mm, keepaspectratio]{figures/vl53l1x_timing_budget.png}
-    \caption{VL53L1X maximum distance, error vs timing budget \cite{VL53L1XDatasheet}}
-    \label{fig:vl53l1x_timing_budget}
-\end{figure}
-
-\begin{table}[ht]
-	% \footnotesize
-	\centering
-	\begin{tabular}{||c c c c||}
-		\hline
-        Timing budget       & Resolution        & Range preset      & Distance  \\
-		\hline
-        18.5 ms      & 1x1, 2x2, 3x3, 4x4      & Short      & 1 m \\
-		\hline
-        33 ms        & 1x1, 2x2, 3x3, 4x4      & Medium, Long       & 1 m \\
-		\hline
-        140 ms       & 1x1, 2x2, 3x3, 4x4      & Medium, Long       & 2.5 m \\
-		\hline
-        140 ms       & 1x1, 2x2, 3x3, 4x4      & Long       & 3 m \\
-		\hline
-        200 ms       & 1x1, 2x2, 3x3, 4x4      & Medium, Long       & 3.5 m \\
-		\hline
-	\end{tabular}
-	\caption{Selected operating modes}
-	\label{tab:selected_operating_modes}
-\end{table}
-
-
-
-
-
-
-\section{Gazebo simulation}
-
-
-
 
 \section{LIDAR layout design}
 As mentioned before, multiple aspects need to be taken into account when placing LIDAR sensors onto a
