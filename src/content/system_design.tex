@@ -204,7 +204,7 @@ can be useful in some cases. Lastly scripts folder is for scripts that are used 
 trajectory extraction or other purposes.
 
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
     \centering
     \includegraphics[width=70mm, keepaspectratio]{figures/vscode_folder_structure.png}
     \caption{Project folder structure in Visual Studio Code}
@@ -241,6 +241,76 @@ output in LaserScan format. PointCloud2 is a newer version of PointCloud and con
 easy. If 30Hz update rate is proved to be too low during future steps, it is possible to use GPU 
 Ray instead.
 
+
+\subsection{Building model}
+Using Gazebo Building Editor I have created a building model to be mapped. The building is minimalistic
+and not furnished, but has details like columns and curves so Cartographer can match scans more 
+efficiently. SLAM will not work properly on a corridor with undetailed walls, because it needs 
+a reference point. If each scan looks exactly the same the algorithm will lose track.
+
+\begin{figure}[!ht]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=62mm, keepaspectratio]{figures/building_1.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=62mm, keepaspectratio]{figures/building_2.png}}}$
+    \caption{Two story building in Gazebo}
+    \label{fig:building_floor_map}
+\end{figure}
+
+The second floor of the designed building is seen on figure \ref{fig:building_floor_map}. The ground
+level has exactly the same floor map, except it also has a staircase in the top left room, windows
+and what is important, it has a ceiling. Using this building it is possible to test the efficiency 
+of 3D SLAM by flying up the stairs and around the second floor.
+
+\subsection{Remote controller}
+After following the previous steps and starting the simulation, the quadcopter with the LIDAR sensor
+is being spawned at the entrance of the building, but it needs to be controlled to fly around the 
+house. I chose to use a virtual controller that has been developed by a student at the laboratory 
+of my department. The controller uses MAVROS topics to send and receive commands to and from the drone. 
+Using this program, the quadcopter can be flown by using the PC keyboard.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=100mm, keepaspectratio]{figures/fly_with_controller.png}
+    \caption{Virtual remote controller for the simulated drone}
+    \label{fig:remote_controller}
+\end{figure}
+
+For evaluation of SLAM the recorded flight time is kept low, so the data filtering and Cartographer 
+can run faster. About 2 minutes of data is enough for comparing the performance of SLAM configurations
+and further flights can take place to test the best configurations.
+
+\subsection{Rosbag filtering}
+Filtering is the process of reading rosbag messages, filtering LIDAR ranges to show behavior of the 
+selected VL53L1X settings and writing the filtered data to a new bag file. Due to the high data rate, 
+rosbags tend to take up lots of disk space. To preserve disk space only necessary topics described in
+\ref{sect:cartographer_environment} are being written to the filtered file.
+
+The recorded rosbag contains LIDAR measurements on two topics, the top sensor covers the top hemisphere,
+the bottom one covers the bottom hemisphere. To simulate a VL53L1X sensor  with 1x1 resolution 
+first of all a cone with a 27$^{\circ}$ opening needs to be cut out of the sphere and the average of 
+these ranges need to be calculated. Then the averaged distances needs to be maximized and the sampling 
+time needs to be reduced according to the selected device settings. For simulating higher resolutions,
+smaller angle needs to be selected.
+
+The raw measurements read from the collected rosbag are PointCloud type, but Cartographer requires 
+PointCloud2 messages. At the end of the filtering, messages are converted to PointCloud2 and written
+to the filtered bag file.
+
+\subsubsection{Angle filter}
+Each PointCloud message contains ranges of the whole scan of the top or bottom hemisphere. As the name
+of the message suggests, these ranges are represented by point coordinates, in reference to the sensor 
+coordinate system. The reference 
+
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=50mm, keepaspectratio]{figures/data_angle_filter.png}
+    \caption{LIDAR angle filter}
+    \label{fig:data_angle_filter}
+\end{figure}
+
+
+\subsection{Cartographer environment} \label{sect:cartographer_environment}
 
 
 
