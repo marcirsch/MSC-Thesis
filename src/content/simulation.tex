@@ -147,6 +147,15 @@ mission by visualizing the drone on a map and the most important sensor data.
 
 
 \section{VL53L1X LIDAR sensor} \label{sect:vl53l1x_intro}
+
+\begin{figure}[ht]
+    \centering
+    $\vcenter{\hbox{\includegraphics[width=50mm, keepaspectratio]{figures/vl53l1x.png}}}$
+    $\vcenter{\hbox{\includegraphics[width=95mm, keepaspectratio]{figures/vl53l1x_roi.png}}}$
+    \caption{VL53L1X sensor \cite{VL53L1XDatasheet} and Region of Interest \cite{VL53L1XApplicationNote}}
+    \label{fig:VL53L1X_sensor}
+\end{figure}
+
 VL53L1X is described as a long distance ranging Time-of-Flight sensor by STMicroelectronics \cite{VL53L1XDatasheet}. 
 The size of the module is 4.9x2.5x1.56mm, it emits 940nm invisible laser and uses a SPAD(single photon 
 avalanche diode) receiving array with a field of view of 27$^{\circ}$. The module runs all digital signal
@@ -155,13 +164,6 @@ The sensor according to the datasheet is capable of 50Hz ranging frequency and u
 measurements. The size of the laser receiving array can be programmatically changed by setting 
 region-of-interest(ROI) size. This way the sensor provides multizone operation and a higher resolution, than
 by using the whole SPAD array.
-\begin{figure}[ht]
-    % \centering
-    $\vcenter{\hbox{\includegraphics[width=50mm, keepaspectratio]{figures/vl53l1x.png}}}$
-    $\vcenter{\hbox{\includegraphics[width=95mm, keepaspectratio]{figures/vl53l1x_roi.png}}}$
-    \caption{VL53L1X sensor \cite{VL53L1XDatasheet} and region-of-interest \cite{VL53L1XApplicationNote}}
-    \label{fig:VL53L1X_sensor}
-\end{figure}
 
 I chose to use this sensor, because of its small size, availability in the university laboratory, low hardware infrastructure needs and 
 previous experience. 

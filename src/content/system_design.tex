@@ -12,18 +12,18 @@ for SLAM algorithm or the other way around. My approach is to first explore the 
 all relevant operating modes, measure the ranging performance like update rate, maximum ranging distance and 
 noise level of the measurements. Later on the optimal operating mode can be chosen based on the SLAM performance. 
 
-The sensor has three parameters, that affect the ranging performance and require tuning for each application. 
-These three parameters are the distance preset, the timing budget and the Region of Interest(ROI). The device 
-has three different distance presets for short, medium and long distance ranging. The second parameter is the
-timing budget, that basically sets how much time is available for the sensor to complete a range. Bigger 
-timing budget means more accurate measurement, but on the downside it lowers the sampling rate.
-
-\begin{figure}[ht]
+\begin{figure}[!hb]
     \centering
     \includegraphics[width=90mm, keepaspectratio]{figures/vl53l1x_roi_setup.png}
     \caption{VL53L1X Region of Interest setting \cite{VL53L1XApplicationNote}}
     \label{fig:vl53l1x_roi_setup}
 \end{figure}
+
+The sensor has three parameters, that affect the ranging performance and require tuning for each application. 
+These three parameters are the distance preset, the timing budget and the Region of Interest(ROI). The device 
+has three different distance presets for short, medium and long distance ranging. The second parameter is the
+timing budget, that basically sets how much time is available for the sensor to complete a range. Bigger 
+timing budget means more accurate measurement, but on the downside it lowers the sampling rate.
 
 As described in section \ref{sect:vl53l1x_intro} the sensor has a configurable SPAD array that can be used to 
 narrow down the field of view to a specific region. This region in the datasheet is called Region of Interest
@@ -32,9 +32,16 @@ can be achieved resulting in a higher resolution up to 4x4. Increased resolution
 that lowers sensitivity and maximum distance that can be measured. Scanning also requires more time because 
 each ROI can take time up to the timing budget.
 
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=140mm, keepaspectratio]{figures/vl53l1x_timing_budget.png}
+    \caption{VL53L1X maximum distance, error vs timing budget \cite{VL53L1XDatasheet}}
+    \label{fig:vl53l1x_timing_budget}
+\end{figure}
+
 \subsection{Selected operating modes}
 To have a better overview how these parameters affect the ranging performance, a number of operating modes 
-have been chosen for testing. Each operating mode is a group of three parameters that are the distance preset
+have been chosen for testing. Each operating mode is a group of three parameters that are the distance preset,
 timing budget and the resolution. The performance of an operating mode is measured by the update rate, maximum 
 ranging distance and standard deviation on a given distance.
 
@@ -48,20 +55,20 @@ expected to improve SLAM performance. This can be achieved by using an inter-mea
 timing budget of 18.5ms, but only in short range preset and ROI size set to maximum. The estimated highest 
 update rate using this operating mode is 50Hz.
 
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=150mm, keepaspectratio]{figures/vl53l1x_spad_arrays.png}
+    \caption{VL53L1X ROI setups}
+    \label{fig:vl53l1x_spad_arrays}
+\end{figure}
+
 As seen on figure \ref{fig:vl53l1x_timing_budget} that the sensor provides measurements with a standard deviation
 under 5mm, but it's not mentioned how the accuracy changes by lowering the ROI size. To investigate the 
 performance of ranging measurements using lower ROI size, four Region of Interest scan patterns have been selected.
 The regions are selected evenly on the SPAD array to provide 1x1, 2x2, 3x3, 4x4 resolution output. These setups 
-have been selected, because this way the regions do not overlap. The sensor would be capable of more complex 
-patterns or even changing the resolution between scans, but these setups should provide a good understanding 
-of the sensor and the effects on the SLAM performance.
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=140mm, keepaspectratio]{figures/vl53l1x_timing_budget.png}
-    \caption{VL53L1X maximum distance, error vs timing budget \cite{VL53L1XDatasheet}}
-    \label{fig:vl53l1x_timing_budget}
-\end{figure}
+have been selected, because this way the regions do not overlap and are evenly distributed. The sensor would be
+capable of more complex patterns or even changing the resolution between scans, but these setups should provide 
+a good understanding of the sensor and the effects on the SLAM performance.
 
 \begin{table}[ht]
 	% \footnotesize
@@ -69,47 +76,63 @@ of the sensor and the effects on the SLAM performance.
 	\begin{tabular}{||c c c c||}
 		\hline
         Timing budget       & Resolution        & Range preset      & Distance  \\
-		\hline
+		\hline\hline
         18.5 ms      & 1x1, 2x2, 3x3, 4x4      & Short      & 1 m \\
 		\hline
         33 ms        & 1x1, 2x2, 3x3, 4x4      & Medium, Long       & 1 m \\
 		\hline
         140 ms       & 1x1, 2x2, 3x3, 4x4      & Medium, Long       & 2.5 m \\
 		\hline
-        140 ms       & 1x1, 2x2, 3x3, 4x4      & Long       & 3 m \\
+        140 ms       & 1x1, 2x2, 3x3, 4x4      & Medium, Long       & 3 m \\
 		\hline
-        200 ms       & 1x1, 2x2, 3x3, 4x4      & Medium, Long       & 3.5 m \\
+        200 ms       & 1x1, 2x2, 3x3, 4x4      & Long       & 3.5 m \\
 		\hline
 	\end{tabular}
 	\caption{Selected operating modes}
 	\label{tab:selected_operating_modes}
 \end{table}
 
+In table \ref{tab:selected_operating_modes} a summary can be found of selected operating modes and a 
+distance to be tested on. These settings are planned to be evaluated incrementally starting with a 
+timing budget of 18.5ms and incrementally moving up to 200ms. With smaller ROI size the maximum 
+distance is degrading, therefore it is expected that some combinations will not be working 
+properly. For example medium preset on 3 meters is expected to be working only on resolution 1x1, 
+but likely to fail on higher resolutions.
 
 
 
 
 
-\section{Gazebo simulation}
 
 
 
+\section{LIDAR layout}
+As mentioned before, multiple aspects need to be taken into account when placing LIDAR sensors on a
+quadcopter with the purpose of using the measurements for SLAM. After gaining experience of the performance
+of each operation mode of the sensor, the next step is to determine the optimal layout and number of sensors 
+to be used. 
 
-\section{LIDAR layout design}
-As mentioned before, multiple aspects need to be taken into account when placing LIDAR sensors onto a
-quadcopter and use the measurements for 3D SLAM. There are several parameters of the sensor that are 
-highly affecting the quality of the map built by SLAM algorithms. These are the field of view, the 
-sampling frequency and the maximum distance that it can measure. To better understand the effects of
-these parameters it is reasonable to first reduce complexity and build a system for 2D mapping. Based on 
-the experience gained during this experiment it can be better estimated how many sensors are needed for
-3D SLAM. Also a possible outcome is that VL53L1X is not suitable for this purpose and a different
-sensor needs to be used, with more suitable parameters.
+In Cartographer 3D SLAM is basically an extension of their 2D solution, but significantly more complex and 
+harder to tune for optimal performance. With this in mind to better understand the effects of
+layout it is reasonable to first reduce complexity and test layouts for 2D mapping. Based on 
+the experience gained during this experiment it can be better estimated how many sensors and in what layout
+are needed for 3D SLAM. A possible outcome is that VL53L1X is not suitable at all for this purpose and
+a different sensor needs to be used, with more suitable parameters. If mapping and localization accuracy 
+is poor in 2D, it is expected to be worse in 3D.
 
 \subsection{Layout design for 2D SLAM}
-To have the best possible layout without overlapping scans, 360$^{\circ}$ of the horizontal plane 
-needs to be covered by the field of view of the LIDAR sensors. The field of view of VL53L1X is 27$^{\circ}$,
-so altogether 13 sensors are needed to cover 97.5\% of the plane, with 27.69$^{\circ}$ in between, leaving
-only 9$^{\circ}$ of uncovered zone.
+Without experience with Cartographer or other SLAM algorithms in general, it is not advisable to give an 
+estimation for the number of sensors to be used or the layout of the sensors at this point. My approach 
+is to start with high number of sensors in a reasonable layout, make it work with Cartographer and then
+incrementally decrease the number of sensors until the result is still acceptable.
+
+For 2D SLAM I chose to place LIDARs evenly to cover the whole 360$^{\circ}$ range of the horizontal plane, 
+without overlapping fields of the sensors. Due to the high sampling rate and parallel ranging operations, 
+overlapping fields could would have a higher probability of crosstalk between neighbors and would produce 
+additional noise in real-world applications, that is better to avoid. Altogether 13 sensors are needed to 
+cover 97.5\% of the plane, with 27.69$^{\circ}$ in between, leaving lass 1$^{\circ}$ of uncovered zone in 
+between fields. 13 sensors can produce 13 points per scan with ROI resolution set to 1x1 and up to 208 
+points with the resolution set to 4x4. 
 
 \begin{figure}[ht]
     \centering
@@ -118,39 +141,138 @@ only 9$^{\circ}$ of uncovered zone.
     \label{fig:2d_13sensor_layout}
 \end{figure}
 
-In this layout the scanning on the horizontal plane is done purely by evenly placing the sensors 
+In this layout the scanning on the horizontal plane is done purely by the evenly placed the sensors 
 around the vertical axis and doesn't take advantage of the movement of the drone during flights, especially 
-turns around the yaw axis. The usage of 13 LIDAR sensors just for 2D scanning would mean 
-a lot of overhead when stepping up to 3D, so a more optimal solution needs to be found, that takes
-advantage of the movement of the drone during turns and therefore uses fewer sensors. 
+turns around the yaw axis. After evaluating the performance of this layout, the number of sensors will be
+incrementally decreased, by removing a number of sensors at a time. The reduced set of sensors will always
+be placed evenly, because multicopters can fly in any direction. The flying style is highly dependent on the
+pilot, so it is best to scan the plane evenly without assuming any dominant flying direction.
 
-The lower limit for the number of sensors is what can be seen on the solution of Bitcraze, 
-the Multi-ranger deck\cite{BitcrazeMultirangerDeck} uses 4 sensors on the horizontal plane facing forward, 
-backwards, left and right. In their demonstration video, the map of a simple room is built in 
-about 20 seconds with update rate of about 10Hz per sensor. 
+The planned bottom limit for the number of sensors is what can be seen on the solution of Bitcraze, 
+the Multi-ranger deck\cite{BitcrazeMultirangerDeck} that uses 4 sensors on the horizontal plane facing forward, 
+backwards, left and right. In their demonstration video, the map of a simple room is built in 20 seconds 
+with a ranging frequency of about 10Hz. 
 
 \subsection{Layout design for 3D SLAM}
-The layout for 3D SLAM depends on the experience gained during simulations of 2D SLAM. In 3D layout,
-the pitch and roll angle changes need to be taken into account too. These differ from vehicle to vehicle,
-faster drones can have a pitch of 30$^{\circ}$, but in indoor environment nor pitch nor roll will go above
-15$^{\circ}$. 
+The layout for 3D SLAM depends on the experience gained during the evaluation of 2D SLAM, but has more 
+freedom in sensor placement. Because multicopters change their pitch and roll angles to move horizontally,
+this movement can be used for scanning of the vehicle's environment. 
 
-\section{LIDAR data collection}
-On a real drone configuration of LIDAR sensors and measurement forwarding to ROS need to be solved. 
-There needs to be a device that communicates with the VL53L1X LIDAR sensors using I2C communication 
+Just like in case of 2D SLAM, in the first layout sensors are placed evenly to cover the whole sphere,
+without overlapping fields. In the following iterations a number of sensors will be removed until the 
+minimum number of sensors is found that still provide a reliable SLAM performance.
+
+
+
+\section{Data collection in Gazebo Simulator}
+To compare the performance SLAM setups using different layouts and operating modes, I have decided to 
+work on the same set of data in each iteration. ROS offers a great tool to record data that is being 
+transferred in ROS topics into a format that they call rosbag. This tool subscribes to the requested
+topics and saves all ongoing data into a file with .bag extension. The same tool can be used to play 
+back previously recorded data and the tool will publish messages at the same rate as it was 
+published originally. ROS also provides a C++ and a Python application programming interface for rosbags
+that can be used to read or write the contents of a bag file.
+
+My plan is to place a high resolution 360$^{\circ}$ LIDAR sensor that covers the whole sphere
+on a simulated quadcopter, fly it around in a building while recording the necessary topics into a rosbag.
+The ranges in this rosbag can be then filtered in a way, that its parameters match the selected operation 
+mode and layout. This way the performance of the SLAM using different layouts and sensor operating modes
+can be compared.
+
+
+
+\subsection{Development environment in Visual Studio Code}
+After building the repository using the guide on PX4 website, I have learned that new models, launch files
+and world files need to be placed in a subdirectory of the repository that is only generated at build. This
+also means that if the project is rebuilt, the newly added files might be overwritten. To avoid overwriting
+on builds, I have started working on these files in a different folder and copy it to their final destination
+just before starting the simulation. 
+
+Cartographer also uses the same mechanism, all files need to be copied to subfolders in its install 
+location. For editing these files I use Visual Studio Code and to make copying easier, I have decided 
+to add a build task in my editor, that copies PX4 files and cartographer files to the corresponding folder.
+This makes the development much easier and less troublesome.
+
+The project folder structure can be seen on figure \ref{fig:vscode_folder_structure}. Measurements folder 
+will contain the output of each SLAM configuration and simulation folder is for ongoing development. Under
+simulation, the bag folder contains recorded and filtered bag files. All cartographer specific files are in
+subfolders of cartographer\_files folder. 
+Catkin\_ws folder holds the Cartographer\_ros repository and its 
+dependencies. Firmware is for storing PX4 repository and firmware\_file contains custom files to be copied
+to the PX4 build directory. QGC stands for QGroundControl, that is not necessary for this simulation, but
+can be useful in some cases. Lastly scripts folder is for scripts that are used for rosbag filtering, 
+trajectory extraction or other purposes.
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=70mm, keepaspectratio]{figures/vscode_folder_structure.png}
+    \caption{Project folder structure in Visual Studio Code}
+    \label{fig:vscode_folder_structure}
+\end{figure}
+
+
+\subsection{Adding LIDAR sensor to a quadcopter model}
+Instead of overwriting files generated during the build procedure of PX4 repository, I have decided to 
+create a custom quadcopter model, that extends the already available Iris drone. Any sensor that is 
+supported Gazebo can be added to it, by editing the model descriptor SDF file. 
+
+The equivalent of a LIDAR sensor in Gazebo is called a Ray sensor, that is highly customizable using
+parameters in the SDF model file. The goal is that the rays of the sensor cover the whole sphere around 
+the quadcopter. The rays of the LIDAR are blocked by the simulated drone so a single sensor
+cannot be used to cover the whole sphere. 
+I have placed two sensors on the drone, one on the top and one on the bottom as close to the body
+of the vehicle as possible, so it is more realistic.
+
+
+\begin{figure}[!ht]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=57mm, keepaspectratio]{figures/lidar_simulation.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=57mm, keepaspectratio]{figures/lidar_simulation_2.png}}}$
+    \caption{LIDAR output visualization in rviz}
+    \label{fig:lidar_visualization_rviz}
+\end{figure}
+
+The maximum update rate of each simulated LIDAR is 30Hz, because Ray sensor uses the CPU for 
+computations instead of using the GPU. It would be possible to use an alternative called GPU Ray,
+but I decided not to use it, because of its output message type. Cargorapher expects ranges aggregated
+into PointCloud2 messages, while Ray sensor's output is PointCloud and the GPU alternative has an 
+output in LaserScan format. PointCloud2 is a newer version of PointCloud and conversion is relatively
+easy. If 30Hz update rate is proved to be too low during future steps, it is possible to use GPU 
+Ray instead.
+
+
+
+
+% Roslaunch is a tool for easily launching multiple ROS nodes, as well as setting parameters. Nodes can
+% be started one by one, but it is more efficient to use a launch file to describe nodes and parameters 
+% to start.
+
+% To make starting of simulations easy and consistent, I have created a new launch file and placed
+
+
+% that collects the models and worlds I have created.
+
+
+
+
+
+\section{Plans for hardware implementation}
+On a real-life drone, the communication of LIDAR sensors and measurement forwarding to ROS topics need
+to be solved. There needs to be a device that communicates with the VL53L1X LIDAR sensors using I2C
 protocol and forwards messages to a ground station that handles data collection and processing.
 
 The data collector device needs to be fast enough to keep up with the pace of 10-20 sensors,
 each with a maximum of 50Hz update rate. The distance data from VL53L1X sensor consists of 12bytes, 
-so 20 sensors on 50Hz generate about 12kb of data per second. This load is calculated using the 
-effective data size, but on the I2C bus other messages need to be sent to trigger data read,
-which means even higher load.
+so by designing for 20 sensors with 50Hz update rate generate about 12kb per second data rate. This 
+load is calculated using the effective data size, but on the I2C bus other configuration messages 
+need to be sent, which means even higher load.
 
-To evaluate the SLAM algorithms on real-world measurements, data collection needs to be done. 
+To evaluate the SLAM algorithms on real-world measurements, data needs to be collected. 
 For evaluation it is not necessary to send data in real-time on wireless network, but saving 
 data on an SD card serves this purpose. Logging on SD card has low complexity and high speed. 
 
-PX4 firmware is an open-source firmware, it seems an obvious choice to use the Pixhawk 4 autopilot board 
+PX4 is an open-source firmware, it seems an easy choice to use the Pixhawk 4 autopilot board 
 as a data collector device. It has an SD card slot for logging and I2C connectors available to
 communicate with the LIDAR sensors and even comes with an I2C splitter board to connect more sensors.
 The microcontroller inside Pixhawk 4 is powerful, it has an ARM Cortex-M7 core running on 216MHz. 
@@ -159,12 +281,12 @@ besides many other tasks. If these control loops are delayed by other processes,
 cause instable flight or even crash.
 
 Because of lack of deep understanding of PX4 firmware, to make sure that timing of control loops 
-are untouched, I decided to build a standalone data collector device, using a dedicated microcontroller that
+are untouched, I decided to design a standalone data collector, using a dedicated microcontroller that
 handles I2C communication with the LIDAR sensors and writes data to an SD card using SPI protocol.
 
 \subsection{Standalone data collector design}
-In I2C protocol every device needs to have a 7 bit address, that needs to be unique on that specific
-I2C bus. VL53L1X sensor has a default address of 0x29 when the sensor is booted, but it can be changed
+In I2C protocol every device needs to have a 7 bit address, that needs to be unique on every
+I2C line. VL53L1X sensor has a default address of 0x29 when the sensor is booted, but it can be changed
 by using I2C commands. Address conflicts need to be avoided by having exactly 1 sensor active per channel.
 It is hard to find a microcontroller that has 20 I2C buses, one for each sensor, so multiple sensors
 need to be placed on the same bus. By having multiple sensors on the same channel, the sensors need to 
@@ -199,7 +321,6 @@ pins are low, group interrupt signal will become logical 1 and 0 otherwise.
 In the simplified design seen on figure \ref{fig:data_collector} only 17 wires are connected to
 the microcontroller, while no functionality is lost. This solution also makes software development
 easier and the built system is clearer.
-
 
 
 
