@@ -222,8 +222,16 @@ parameters in the SDF model file. The goal is that the rays of the sensor cover 
 the quadcopter. The rays of the LIDAR are blocked by the simulated drone so a single sensor
 cannot be used to cover the whole sphere. 
 I have placed two sensors on the drone, one on the top and one on the bottom as close to the body
-of the vehicle as possible, so it is more realistic.
+of the vehicle as possible. 
 
+Since the VL53L1X sensors in real-world application would be measuring simultaneously, the simulated 
+LIDARs are also set to scan every angle at once and send all ranges in a single message. The maximum 
+range is set to 4 meters and the update rate is at 50Hz. Gazebo is able to simulate predefined measurement
+noise, but at first I have decided not to add additional noise. During data filtering these measured 
+point clouds will be down-sampled by averaging on regions and noise can be simulated in addition at 
+this stage. In each scan 128 horizontal and 64 vertical points are sampled per sensor, resulting in 
+a total number of 128*128 measurement points and angular resolution of 2.8$^{\circ}$ both vertical 
+and horizontal.
 
 \begin{figure}[!ht]
     \centering
@@ -234,19 +242,22 @@ of the vehicle as possible, so it is more realistic.
 \end{figure}
 
 The maximum update rate of each simulated LIDAR is 30Hz, because Ray sensor uses the CPU for 
-computations instead of using the GPU. It would be possible to use an alternative called GPU Ray,
+computations instead of the GPU. It would be possible to use an alternative called GPU Ray,
 but I decided not to use it, because of its output message type. Cargorapher expects ranges aggregated
 into PointCloud2 messages, while Ray sensor's output is PointCloud and the GPU alternative has an 
 output in LaserScan format. PointCloud2 is a newer version of PointCloud and conversion is relatively
 easy. If 30Hz update rate is proved to be too low during future steps, it is possible to use GPU 
-Ray instead.
+Ray instead, that requires modifications in the filtering algorithm.
 
 
 \subsection{Building model}
 Using Gazebo Building Editor I have created a building model to be mapped. The building is minimalistic
-and not furnished, but has details like columns and curves so Cartographer can match scans more 
-efficiently. SLAM will not work properly on a corridor with undetailed walls, because it needs 
-a reference point. If each scan looks exactly the same the algorithm will lose track.
+and not furnished, but contains enough details like columns and curves to allow Cartographer to match 
+scans more efficiently. For example SLAM is not expected not work properly on a corridor without any details
+in range, because it needs a reference points that can be used for scan matching. If each scan looks exactly
+the same the algorithm will lose track resulting in bad map quality. This is increasingly in focus in this
+case, because the maximum distance of the VL53L1X sensor to be used is 4m and the sensor has a wide field 
+of view that hides details of faraway objects.
 
 \begin{figure}[!ht]
     \centering
@@ -258,15 +269,16 @@ a reference point. If each scan looks exactly the same the algorithm will lose t
 
 The second floor of the designed building is seen on figure \ref{fig:building_floor_map}. The ground
 level has exactly the same floor map, except it also has a staircase in the top left room, windows
-and what is important, it has a ceiling. Using this building it is possible to test the efficiency 
-of 3D SLAM by flying up the stairs and around the second floor.
+and what is important, it has a ceiling. Ceiling is expected to play an important role in 3D slam,
+adding an extra reference point for vertical positioning. Using this building it is possible in 
+the future to test the efficiency of 3D SLAM by flying up the stairs and around the second floor.
 
 \subsection{Remote controller}
 After following the previous steps and starting the simulation, the quadcopter with the LIDAR sensor
 is being spawned at the entrance of the building, but it needs to be controlled to fly around the 
 house. I chose to use a virtual controller that has been developed by a student at the laboratory 
 of my department. The controller uses MAVROS topics to send and receive commands to and from the drone. 
-Using this program, the quadcopter can be flown by using the PC keyboard.
+Using this program, the quadcopter can be flown by using the PC keyboard. 
 
 \begin{figure}[!ht]
     \centering
@@ -277,41 +289,75 @@ Using this program, the quadcopter can be flown by using the PC keyboard.
 
 For evaluation of SLAM the recorded flight time is kept low, so the data filtering and Cartographer 
 can run faster. About 2 minutes of data is enough for comparing the performance of SLAM configurations
-and further flights can take place to test the best configurations.
+and further flights can take place to further test the evaluated configurations.
 
 \subsection{Rosbag filtering}
 Filtering is the process of reading rosbag messages, filtering LIDAR ranges to show behavior of the 
 selected VL53L1X settings and writing the filtered data to a new bag file. Due to the high data rate, 
-rosbags tend to take up lots of disk space. To preserve disk space only necessary topics described in
-\ref{sect:cartographer_environment} are being written to the filtered file.
+rosbags tend to take up lots of disk space. To preserve disk space and increase processing speed,
+only necessary topics described in \ref{sect:cartographer_environment} are being written to the filtered file.
 
 The recorded rosbag contains LIDAR measurements on two topics, the top sensor covers the top hemisphere,
-the bottom one covers the bottom hemisphere. To simulate a VL53L1X sensor  with 1x1 resolution 
-first of all a cone with a 27$^{\circ}$ opening needs to be cut out of the sphere and the average of 
-these ranges need to be calculated. Then the averaged distances needs to be maximized and the sampling 
-time needs to be reduced according to the selected device settings. For simulating higher resolutions,
-smaller angle needs to be selected.
+the bottom one covers the bottom hemisphere. To simulate a VL53L1X sensor first of all a cone with a 
+selected opening angle needs to be cut out of the sphere of points and the average of ranges inside the 
+cone need to be calculated. Then the averaged distances are maximized and the sampling time is 
+reduced according to the selected device settings. For simulating higher resolutions, the same methodology 
+can be used, but with smaller opening angle.
 
 The raw measurements read from the collected rosbag are PointCloud type, but Cartographer requires 
-PointCloud2 messages. At the end of the filtering, messages are converted to PointCloud2 and written
-to the filtered bag file.
+PointCloud2 messages. At the end, the filtered points are converted to PointCloud2 and written
+to the filtered bag file. 
 
 \subsubsection{Angle filter}
-Each PointCloud message contains ranges of the whole scan of the top or bottom hemisphere. As the name
-of the message suggests, these ranges are represented by point coordinates, in reference to the sensor 
-coordinate system. The reference 
+Each PointCloud message contains a complete scan from either the top or bottom sensor, that scan the 
+top or bottom hemisphere accordingly. As the message type suggests, these ranges are represented by 
+point clouds, a list of 3 dimensional point coordinates in reference to the sensor coordinate system. During 
+angle filtering this point cloud is being down-sampled to lower resolution that simulates the sensors
+placed on the quadcopter.
 
+VL53L1X sensor has a cone shaped field of view in which the reflected signal is detected and converted to
+a range measurement. To match this behavior, a cone shaped subset of the points are selected for further
+processing. A point is selected if the angle between the point and the center of the field of view is less
+than a predefined $\theta$ angle threshold.
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=50mm, keepaspectratio]{figures/data_angle_filter.png}
+    \includegraphics[width=80mm, keepaspectratio]{figures/data_angle_filter.png}
     \caption{LIDAR angle filter}
     \label{fig:data_angle_filter}
 \end{figure}
 
 
-\subsection{Cartographer environment} \label{sect:cartographer_environment}
+The angle between two vectors, or in this case between a point from the point cloud and the center vector 
+can be calculated using the dot product of the two. Equation \ref{eq:vec_product_angle} and 
+\ref{eq:vec_product_coordinates} are two forms of dot product. These are used to derive equation 
+\ref{eq:vec_product_final} that is used to calculate the angle. In this case vectors $\vec{u}$ and 
+$\vec{v}$ are the center vector and a selected point from the point cloud. 
 
+
+\begin{equation} \label{eq:vec_product_angle}
+    \vec{u}\cdot\vec{v}=\left\|\vec{u}\right\|\left\|\vec{v}\right\|cos(\alpha)
+\end{equation}
+\begin{equation} \label{eq:vec_product_coordinates}
+    \vec{u}\cdot\vec{v}=u_{x}v_{x}+u_{y}v_{y}+u_{z}v_{z}
+\end{equation}
+\begin{equation} \label{eq:vec_product_final}
+    \alpha = cos^{-1}\frac{u_{x}v_{x}+u_{y}v_{y}+u_{z}v_{z}}{\left\|\vec{u}\right\|\left\|\vec{v}\right\|}
+\end{equation}
+
+For every point inside the point cloud this angle is calculated and points that have an angle less than the 
+predefined $\theta$ are added to the list of points inside the field of view. As a final step average of the 
+selected points is calculated. Points once again are represented by coordinates, therefore average is calculated 
+by averaging the x, y and z coordinates resulting in the coordinates of a single point.
+
+The steps described above are for the filtering a single sensor, but the same steps apply for multiple 
+sensors. Higher resolutions are constructed by multiple field of views, with a lower angle threshold of 
+$\theta$. Points inside a PointCloud message always take the same order, therefore it's enough to filter 
+for angles only once and use the indexes of these points from that on. This way lots of processing capacity
+can be saved and it proved to be much more efficient on high number of simulated sensors.
+
+\subsection{Cartographer environment} \label{sect:cartographer_environment}
+Describe topics too.
 
 
 % Roslaunch is a tool for easily launching multiple ROS nodes, as well as setting parameters. Nodes can
