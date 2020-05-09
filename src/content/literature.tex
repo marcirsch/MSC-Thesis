@@ -377,10 +377,12 @@ Cartographer is a system developed by Google that provides real-time simultaneou
 in 2D and 3D across multiple platforms and sensor configurations. Cartographer is used by Google street view
 for mapping of building interiors, using a backpack mounted LIDAR scanner.
 
-There are officially available SLAM packages in ROS, the most popular packages are Gmapping, Cartographer and Hector SLAM.
-Gmapping package contains a ROS wrapper for OpenSlam's Gmapping that provides laser based SLAM as a ROS node. 
-Gmapping and Hector SLAM are limited to 2D map building, therefore these are not considered for this project.
-
+There are officially available SLAM packages in ROS, the most popular packages are Gmapping, Cartographer and 
+Hector SLAM. For the scope of this thesis, only ROS compatible packages are being concerned. Gmapping and Hector
+SLAM are popular choices for SLAM among developers and even unofficial 3D extensions are available, but 
+officially they only support 2D mapping. Cartographer supports 3D SLAM without any modifications and for 
+this reason Cartographer has been selected. For some yet unforeseen if Cartographer is proved to be incapable
+of handling the selected sensors, other SLAM algorithms can be considered.
 \begin{figure}[!ht]
     \centering
 	\includegraphics[width=140mm, keepaspectratio]{figures/cartographer_slam.png}

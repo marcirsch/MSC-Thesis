@@ -298,17 +298,29 @@ rosbags tend to take up lots of disk space. To preserve disk space and increase 
 only necessary topics described in \ref{sect:cartographer_environment} are being written to the filtered file.
 
 The recorded rosbag contains LIDAR measurements on two topics, the top sensor covers the top hemisphere,
-the bottom one covers the bottom hemisphere. To simulate a VL53L1X sensor first of all a cone with a 
-selected opening angle needs to be cut out of the sphere of points and the average of ranges inside the 
-cone need to be calculated. Then the averaged distances are maximized and the sampling time is 
+the bottom one covers the bottom hemisphere. To simulate a VL53L1X sensor behavior, a field of view with a 
+selected opening angle is cut out of the point cloud. Then an average of ranges inside this view is calculated.
+The averaged distances are then maximized to a set maximum distance threshold and the sampling time is 
 reduced according to the selected device settings. For simulating higher resolutions, the same methodology 
-can be used, but with smaller opening angle.
+can be used, by using multiple field of views with smaller opening angles.
 
 The raw measurements read from the collected rosbag are PointCloud type, but Cartographer requires 
 PointCloud2 messages. At the end, the filtered points are converted to PointCloud2 and written
 to the filtered bag file. 
 
-\subsubsection{Angle filter}
+\subsubsection{Update rate}
+LIDAR messages are recorded in a rosbag at a certain rate and it needs to be down-sampled to match
+the desired update rate. Every PointCloud message has a header field that contains the current time
+at publish. During filtering each message is read from an input bag in order as they were published.
+A PointCloud message is only considered for filtering, if the time difference between the last written 
+and the current message is greater than the defined update rate. Otherwise the message is discarded.
+
+Using this procedure the update rate will not match exactly the desired rate, but keeps data integrity
+and order with other messages. 
+
+
+
+\subsubsection{Field of View}
 Each PointCloud message contains a complete scan from either the top or bottom sensor, that scan the 
 top or bottom hemisphere accordingly. As the message type suggests, these ranges are represented by 
 point clouds, a list of 3 dimensional point coordinates in reference to the sensor coordinate system. During 
@@ -323,7 +335,7 @@ than a predefined $\theta$ angle threshold.
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=80mm, keepaspectratio]{figures/data_angle_filter.png}
-    \caption{LIDAR angle filter}
+    \caption{Point cloud angle filter}
     \label{fig:data_angle_filter}
 \end{figure}
 
@@ -344,6 +356,9 @@ $\vec{v}$ are the center vector and a selected point from the point cloud.
 \begin{equation} \label{eq:vec_product_final}
     \alpha = cos^{-1}\frac{u_{x}v_{x}+u_{y}v_{y}+u_{z}v_{z}}{\left\|\vec{u}\right\|\left\|\vec{v}\right\|}
 \end{equation}
+\begin{equation} \label{eq:vec_length}
+\left\|\vec{u}\right\| = \sqrt{u_{x}^{^{2}}+u_{y}^{^{2}}+u_{z}^{^{2}}}, \left\|\vec{v}\right\| = \sqrt{v_{x}^{^{2}}+v_{y}^{^{2}}+v_{z}^{^{2}}}
+\end{equation}
 
 For every point inside the point cloud this angle is calculated and points that have an angle less than the 
 predefined $\theta$ are added to the list of points inside the field of view. As a final step average of the 
@@ -352,12 +367,121 @@ by averaging the x, y and z coordinates resulting in the coordinates of a single
 
 The steps described above are for the filtering a single sensor, but the same steps apply for multiple 
 sensors. Higher resolutions are constructed by multiple field of views, with a lower angle threshold of 
-$\theta$. Points inside a PointCloud message always take the same order, therefore it's enough to filter 
+$\theta$. Figure \ref{fig:data_angle_filter_high_res} shows an example for field of view selection for 
+a resolution of 2x2. Field of view center line and angle threshold are not drawn, to keep the figure simple. 
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=60mm, keepaspectratio]{figures/data_angle_filter_high_res.png}
+    \caption{Representation of 2x2 LIDAR resolution filtering}
+    \label{fig:data_angle_filter_high_res}
+\end{figure}
+
+Points inside a PointCloud message always take the same order, therefore it's enough to filter 
 for angles only once and use the indexes of these points from that on. This way lots of processing capacity
 can be saved and it proved to be much more efficient on high number of simulated sensors.
 
+
+\subsubsection{Distance filter}
+Angle filter returns a single point for each predefined field of view. For each sensor it can mean a single 
+point or up to 16 points in case of a resolution of 4x4. As the second step, distance filter receives these 
+points and calculates the distance of each point from the origin, basically the same as calculation of length
+of a vector. If the distance is greater than the defined maximum distance, the length of the vector
+is shortened to the maximum distance. On figure \ref{fig:data_distance_filter} $p_{o}$ represents the 
+point and $p_{s}$ is the shortened vector.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=70mm, keepaspectratio]{figures/data_distance_filter.png}
+    \caption{Point cloud distance filter}
+    \label{fig:data_distance_filter}
+\end{figure}
+
+\begin{equation} \label{eq:point_length}
+    \left\|\vec{p_{o}}\right\| = \sqrt{{p_{o}^{x}}^{2}+{p_{o}^{y}}^{2}+{p_{o}^{z}}^{2}}
+\end{equation}
+
+To shorten the length of a vector, all three coordinates need to be recalculated in such way, that the attitude of
+the vector does not change. To do so, vertical $\vartheta$ and horizontal $\varphi$ angles for vector $p_{o}$
+are calculated using equation \ref{eq:vec_elevation} and \ref{eq:vec_horizontal}.
+
+\begin{equation} \label{eq:vec_elevation}
+    \vartheta=tan\frac{p_{o}^{z}}{\sqrt{{p_{o}^{x}}^{2} + {p_{o}^{y}}^{2}}}
+\end{equation}
+\begin{equation} \label{eq:vec_horizontal}
+    \varphi=tan\frac{p_{o}^{y}}{p_{o}^{x}}
+\end{equation}
+
+Using the vertical and horizontal angles, the coordinates of the shortened $p_{s}$ is calculated using 
+trigonometric equations \ref{eq:vec_new_coordinate_x}, \ref{eq:vec_new_coordinate_y} 
+and \ref{eq:vec_new_coordinate_z}.
+
+\begin{equation} \label{eq:vec_new_coordinate_x}
+    p_{s}^{x} = d_{max} \cdot cos\vartheta \cdot cos\varphi
+\end{equation}
+\begin{equation} \label{eq:vec_new_coordinate_y}
+    p_{s}^{y} = d_{max} \cdot cos\vartheta \cdot sin\varphi
+\end{equation}
+\begin{equation} \label{eq:vec_new_coordinate_z}
+    p_{s}^{z} = d_{max} \cdot  sin\vartheta
+\end{equation}
+
+
+
 \subsection{Cartographer environment} \label{sect:cartographer_environment}
-Describe topics too.
+Cartographer can be installed on Ubuntu operating system easily by using the apt-get tool, but this
+method would overwrite the system installed Protobuf with a newer version. Protobuf is used by 
+Gazebo and it requires a certain version, replacing it with another version causes incompatibility 
+and simulations cannot be started. For this reason I have installed Cartographer and Cartographer\_ros
+packages inside a Catkin workspace and set them to use locally installed Protobuf inside the same
+workspace. Using these settings, Cartographer and Gazebo can be used on the same PC.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=70mm, keepaspectratio]{figures/cartographer_tf_setup.png}
+    \caption{Cartographer top, bottom LIDAR and IMU link relations}
+    \label{fig:cartographer_tf_setup}
+\end{figure}
+
+
+To attach the LIDAR sensors onto the simulated quadcopter in Gazebo, two links have been introduced that
+connect to the base\_link of the drone, one on the top and one on the bottom. The LIDAR scanner messages 
+are sent in reference to these links and therefore Cartographer needs to know the transformation from the
+sensor frames to the base\_link frame. Two official packages are required called robot\_state\_publisher
+and joint\_state\_publisher. These take a robot\_description parameter that can be set using an urdf file 
+and they start publishing the link and joint relations. Besides the LIDAR holder links, a link for IMU 
+transformation is also need to be added. The simulated IMU in the PX4 repository is used and it is located in 
+the origin of base\_link. Laser\_top\_link is located 6cm up, laser\_bottom\_link is located 10cm down
+on the z axis in reference to base\_link as seen on \ref{fig:cartographer_tf_setup}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=110mm, keepaspectratio]{figures/cartographer_tf_tree.png}
+    \caption{Cartographer tf tree}
+    \label{fig:cartographer_tf_tree}
+\end{figure}
+
+
+While running Cartographer on filtered data, the following tf tree is built as on \ref{fig:cartographer_tf_tree}.
+Transformations between map, odom and base\_link are published by Cartographer and the rest is published 
+from the created urdf file. This tf tree matches the recommendation from the Cartographer documentation
+website \cite{CartographerDocumentation}.
+
+IMU input for 3D mapping is a must and optional for 2D mapping. Cartographer waits for IMU to be supplied 
+on topic /imu. PX4 simulation publishes IMU data to /mavros/imu/data, but this topic can be remapped to /imu
+using the launch file without the need of any extra nodes. Filtered range messages with PointCloud2 type 
+can be accessed on topics /points2\_1 and /points2\_2. List of nodes and interactions via topics can be 
+seen on figure.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=130mm, keepaspectratio]{figures/cartographer_nodes.png}
+    \caption{Cartographer nodes and topics}
+    \label{fig:cartographer_nodes}
+\end{figure}
+
+
+
 
 
 % Roslaunch is a tool for easily launching multiple ROS nodes, as well as setting parameters. Nodes can
@@ -370,7 +494,7 @@ Describe topics too.
 % that collects the models and worlds I have created.
 
 
-
+\newpage
 
 
 \section{Plans for hardware implementation}
