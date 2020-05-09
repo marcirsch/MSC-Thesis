@@ -428,7 +428,7 @@ and \ref{eq:vec_new_coordinate_z}.
 
 
 
-\subsection{Cartographer environment} \label{sect:cartographer_environment}
+\section{Cartographer environment} \label{sect:cartographer_environment}
 Cartographer can be installed on Ubuntu operating system easily by using the apt-get tool, but this
 method would overwrite the system installed Protobuf with a newer version. Protobuf is used by 
 Gazebo and it requires a certain version, replacing it with another version causes incompatibility 
@@ -480,10 +480,57 @@ seen on figure.
     \label{fig:cartographer_nodes}
 \end{figure}
 
+\subsection{Configuration and tuning}
+Cartographer can be configured using a lua configuration file. Multiple range measurement types are 
+supported, but the filtered rosbag contains PointCloud2 messages on two topics. The num\_point\_clouds 
+parameter is set to 2 to match the two topics coming from the top and bottom sensors. 
+
+Cartographer applies a bandpass filter on the incoming range messages to filter out irrelevant 
+measurements. In every case max\_range parameter needs to be set a bit lower, than the maximum distance
+parameter used for filtering. This is important, because the algorithm inserts a range with a distance 
+under max\_range as a hit, but inserts anything above as a miss. Wrongly setting this parameter results
+in adding all range measurements as hits and no misses will be inserted that will confuse cartographer.
+
+Each sensor setup require the SLAM algorithm to be tuned and therefore a new configuration file is 
+created for every setup being tested. Tuning starts with setting POSE\_GRAPH.optimize\_every\_n\_nodes to
+0 to disable global SLAM. Good and clear submaps are needed for global SLAM to find loop closures.
+Submaps are the building blocks of maps. On small maps like the building I chose for LIDAR setup 
+evaluation, global SLAM is not making much difference, but when tuning submaps it can cause unwanted
+artifacts that are hard to differentiate from submap errors.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=80mm, keepaspectratio]{figures/cartographer_submaps.png}
+    \caption{Building of submaps visualized in rviz}
+    \label{fig:cartographer_submap_building}
+\end{figure}
+
+Typically a small number of parameters need to be tuned for submaps to be working. These are the following:
+\begin{itemize}
+    \item TRAJECTORY\_BUILDER\_nD.ceres\_scan\_matcher.translation\_weight
+    \item TRAJECTORY\_BUILDER\_nD.ceres\_scan\_matcher.rotation\_weight
+    \item TRAJECTORY\_BUILDER\_nD.ceres\_scan\_matcher.occupied\_space\_weight 
+    \item submaps.num\_range\_data
+\end{itemize}
+The first parameter sets how high the cost is for cartographer to move the a scan. In my experience,
+it needs to be set low when used on a drone, because it changes place quickly. The second parameter sets 
+how much trust should be put on the IMU data. The lower this parameter is set, the easier it is to 
+rotate a scan. Occupied space weight is sets the trust in the LIDAR sensor. I haven't found this 
+parameter particularly useful. Changing the submap size, by num\_range data parameter is important, 
+because by changing the update rate, different number of range measurements are needed, while the 
+submap size should not change.
+
+
+\subsection{Trajectory extraction}
+Evaluating the mapping quality is complex relative to evaluating the location tracking performance
+of a SLAM setup. Gazebo provides a topic where all link states are published and this transformation
+can be used as ground truth and trajectory extracted from SLAM can be compared to it.
+
+TODO: Wrong configuration picture
 
 
 
-
+ 
 % Roslaunch is a tool for easily launching multiple ROS nodes, as well as setting parameters. Nodes can
 % be started one by one, but it is more efficient to use a launch file to describe nodes and parameters 
 % to start.
