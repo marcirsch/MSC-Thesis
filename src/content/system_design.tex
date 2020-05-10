@@ -291,7 +291,7 @@ For evaluation of SLAM the recorded flight time is kept low, so the data filteri
 can run faster. About 2 minutes of data is enough for comparing the performance of SLAM configurations
 and further flights can take place to further test the evaluated configurations.
 
-\subsection{Rosbag filtering}
+\section{Rosbag filtering}
 Filtering is the process of reading rosbag messages, filtering LIDAR ranges to show behavior of the 
 selected VL53L1X settings and writing the filtered data to a new bag file. Due to the high data rate, 
 rosbags tend to take up lots of disk space. To preserve disk space and increase processing speed,
@@ -308,7 +308,7 @@ The raw measurements read from the collected rosbag are PointCloud type, but Car
 PointCloud2 messages. At the end, the filtered points are converted to PointCloud2 and written
 to the filtered bag file. 
 
-\subsubsection{Update rate}
+\subsection{Update rate}
 LIDAR messages are recorded in a rosbag at a certain rate and it needs to be down-sampled to match
 the desired update rate. Every PointCloud message has a header field that contains the current time
 at publish. During filtering each message is read from an input bag in order as they were published.
@@ -320,7 +320,7 @@ and order with other messages.
 
 
 
-\subsubsection{Field of View}
+\subsection{Field of View}
 Each PointCloud message contains a complete scan from either the top or bottom sensor, that scan the 
 top or bottom hemisphere accordingly. As the message type suggests, these ranges are represented by 
 point clouds, a list of 3 dimensional point coordinates in reference to the sensor coordinate system. During 
@@ -382,7 +382,7 @@ for angles only once and use the indexes of these points from that on. This way 
 can be saved and it proved to be much more efficient on high number of simulated sensors.
 
 
-\subsubsection{Distance filter}
+\subsection{Distance filter}
 Angle filter returns a single point for each predefined field of view. For each sensor it can mean a single 
 point or up to 16 points in case of a resolution of 4x4. As the second step, distance filter receives these 
 points and calculates the distance of each point from the origin, basically the same as calculation of length
@@ -515,21 +515,139 @@ Typically a small number of parameters need to be tuned for submaps to be workin
 The first parameter sets how high the cost is for cartographer to move the a scan. In my experience,
 it needs to be set low when used on a drone, because it changes place quickly. The second parameter sets 
 how much trust should be put on the IMU data. The lower this parameter is set, the easier it is to 
-rotate a scan. Occupied space weight is sets the trust in the LIDAR sensor. I haven't found this 
-parameter particularly useful. Changing the submap size, by num\_range data parameter is important, 
-because by changing the update rate, different number of range measurements are needed, while the 
-submap size should not change.
+rotate a scan and be matched against other scans in the submap. Occupied space weight is sets the 
+trust in the LIDAR sensor. I haven't found this parameter particularly useful. Changing the submap 
+size, by num\_range data parameter is important, because by changing the update rate, different 
+number of range measurements are needed, while the submap scope should not change.
 
 
-\subsection{Trajectory extraction}
+\subsection{Trajectory extraction}\label{sect:trajectory_extraction}
 Evaluating the mapping quality is complex relative to evaluating the location tracking performance
 of a SLAM setup. Gazebo provides a topic where all link states are published and this transformation
 can be used as ground truth and trajectory extracted from SLAM can be compared to it.
 
-TODO: Wrong configuration picture
+I found two ways to extract trajectory from Cartographer. One is to create a node that subscribes to
+/tf topic and saves map to base\_link transformations that is published by Cartographer. The other
+way is to save the internal variables of the algorithm into a pbstream file and use a script to read
+the pose estimations from there. For some reason published transformations proved unreliable on my
+tests, but the published trajectory node list on topic /trajectory\_node\_list contains the correct
+pose estimates.
+
+Cartographer can run in mapping mode and pure localization mode. In localization mode, it
+only stores variables for several seconds and for this reason the pbstream file does not contain
+the whole trajectory. In this mode, trajectory can only be extracted by saving pose from 
+/trajectory\_node\_list topic. For mapping mode I have decided to use trajectory extracted from 
+the pbstream file.
 
 
 
+
+\section{SLAM performance evaluation}
+As the name SLAM suggests and described before, it focuses not only on mapping but simultaneous 
+localization too. On the other hand evaluation of mapping and localization can be done separately.
+This thesis mainly focuses on localization, while mapping is secondary. For this
+reason only localization accuracy is being measured quantitatively and mapping accuracy is 
+only evaluated by visual inspection.
+
+By SLAM performance I mean the accuracy of the localization of each setup. While the number of 
+sensors used and their placement are important parameters of a setup, these are not included in
+the evaluation process. The goal of evaluation is to give an objective measure of the localization
+accuracy, independently from the hardware implementation. 
+
+In order to compare SLAM setups, an objective measure of goodness need to be introduced. Based 
+on this quantitative measure or score, the setups can be compared. Localization is chosen to be 
+the main focus and it can be measured by comparing the trajectory output of the algorithm
+to a ground truth. 
+As described in \ref{sect:trajectory_extraction} the list of estimated poses can be extracted 
+from the pbstream file, provided by Cartographer. On topic /gazebo/link\_states transformations
+are available for base\_link that were used for visualization of the quadcopter in Gazebo. 
+This data is the most accurate position information available and therefore it is chosen to be used as
+ground truth for the drone's trajectory.
+
+Cartographer can either be run in normal operation or in pure localization mode. Pure localization
+mode means, that the algorithm only keeps a small number of submaps in the memory at a time and 
+matches them against submaps of a previously built map. Further building of the map is disabled 
+in this mode and submaps will be discarded once they become obsolete. 
+
+In case of Cartographer, pure localization mode is basically a stripped down version of the normal
+operation mode and for this reason building good quality submaps is also essential for the algorithm to 
+be working accurately. Tuning procedure can happen in normal operation mode and then used in 
+localization mode afterwards. A setup that is able to produce good quality submaps, means it
+will also work accurately in localization mode, therefore I chose to evaluate and compare setups
+in normal operation mode. 
+
+\subsection{Down-sampling}
+Link states are much more often published by gazebo, than the extracted trajectory by Cartographer. 
+To compare the two sets of data, they need to have the same size. To achieve that, ground truth
+data is down-sampled to the size of the SLAM trajectory.
+
+\subsection{Offset compensation}
+Before error calculations, the SLAM trajectory needs to be rotated and moved to align with the
+ground truth data. The distance and rotation offsets are calculated using the first pose from both
+datasets. The distance offset equals to the difference of the x,y and z coordinates of the poses,
+while the rotation offset is the difference between the yaw angles. In my initial tests there were 
+no roll and pitch offsets present, because of the use of IMU of Cartographer. 
+
+To compensate for different starting points, the calculated offsets on each axis needs to be 
+subtracted from every data point present in SLAM trajectory. For the rotation offset, the 
+following trigonometric formulas are used, where $\theta$ is the offset on yaw angle.
+
+\begin{equation}\label{eq:rotation_x}
+    x'=x\cdot cos\theta + y\cdot sin\theta    
+\end{equation}
+
+\begin{equation}\label{eq:rotation_y}
+    y'=-x\cdot sin\theta + y \cdot cos\theta
+\end{equation}
+
+\begin{figure}[!ht]
+    \centering
+	$\vcenter{\hbox{\includegraphics[width=70mm, keepaspectratio]{figures/trajectory_example_uncompensated.png}}}$
+    $\vcenter{\hbox{\includegraphics[width=70mm, keepaspectratio]{figures/trajectory_example_compensated.png}}}$
+    \caption{Extracted trajectory against ground truth before and after offset compensation}
+    \label{fig:before_after_offset}
+\end{figure}
+
+
+
+
+
+\subsection{Trajectory error calculation}
+As a quantitative measure I chose to use the error of the estimated trajectory, calculated using 
+the RMS error formula \ref{eq:rms_formula}. The RMS error is calculated on all three axes, 
+$\hat{c_i}$ is one coordinate of the estimated pose the and $c_i$ is the according coordinate 
+of the pose from ground truth trajectory.
+
+\begin{equation}\label{eq:rms_formula}
+    RMSError(c)=\sqrt{\frac{\sum_{i=1}^{n}(\hat{c_i}-c_i)^2}{n}}
+\end{equation}
+
+After calculating RMS error on all three axes, to get the cumulated trajectory error the 
+values are summed. The result is a single positive number in meters, that can be used to
+compare the accuracy of different SLAM setups.
+
+
+\section{Complete workflow}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=140mm, keepaspectratio]{figures/workflow.png}
+    \caption{Complete workflow}
+    \label{fig:workflow}
+\end{figure}
+
+The complete workflow is as seen on figure \ref{fig:workflow}. As preliminary steps a rosbag is
+recorded and ground truth trajectory is extracted from it. After this step, all SLAM setups
+will be evaluated based on this data. To evaluate a selected setup, first the rosbag is
+filtered according the layout and sensor settings. Then Cartographer SLAM is run and 
+tuned for this dataset. At step 4 the RMS error is calculated based on the estimated 
+trajectory from the SLAM algorithm. 
+
+These 4 steps are done for every selected SLAM setups and as a final step the results 
+will be compared.
+
+
+  
  
 % Roslaunch is a tool for easily launching multiple ROS nodes, as well as setting parameters. Nodes can
 % be started one by one, but it is more efficient to use a launch file to describe nodes and parameters 
