@@ -221,13 +221,159 @@ microcontroller that is not favorable in most applications.
 \newpage
 
 \section{2D SLAM evaluation}
-TODO
+During the evaluation both in 2D and 3D the same collected data will be used. The length 
+of the collected rosbag is 144 seconds and contains all messages coming from all nodes on all
+topics. The LIDAR distance measurements are published on two PointCloud topics on 30Hz each
+and IMU data is published by PX4 flight controller stack on 50Hz.
+The ground-truth pose data is extracted from the original dataset into a csv file and will 
+be used for trajectory comparison in all scenarios. The original rosbag is then filtered 
+to simulate a number of VL53L1X sensors with selected parameters. The filtered bags only 
+contain the converted PointCloud2 and IMU besides the necessary clock messages.
+
+The evaluation of Cartographer SLAM happens in incremental steps. It's unclear what parameters
+affect the performance the most, so instead of applying all of them at once, I chose to introduce
+these LIDAR parameters incrementally one by one to see the effects of them independently 
+and work towards a complete set of parameters. 
+
+In the first simulation only converted but unfiltered range data is used, that has the 
+maximum possible sampling rate, 4m maximum distance and 128x128 resolution in total of 
+the top and bottom hemispheres. This will produce the most accurate map and localization 
+estimates, it is unlikely that any down-sampled dataset will produce better results.
+
+As the second step the effect of the resolution is tested. 13 LIDAR sensors are placed
+evenly on the horizontal axis and their resolution is set to 4x4 first and lowered to 3x3,
+2x2 and 1x1. The sampling rate and maximum distance parameters are left unchanged.
+
+To investigate the effect of the sampling rate, the resolution with the best performance 
+from the previous step is used, but with the sampling rate of the actual sensor. Finally
+the maximum distance is lowered, while keeping the same layout of the sensors.
+
+After introducing all parameters the number of sensors is lowered until the lowest number 
+sensors is found, that is still capable of producing a decent quality map.
+
+
 \subsection{Unfiltered data}
-TODO
-\subsection{2D SLAM with 1x1 resolution}
-TODO
+In this step the range measurements inside the collected rosbag are converted to PointCloud2 
+without filtering and get written to a new bag. The LIDAR ranges visualized in 
+Rviz can be seen on figure \ref{fig:01_maxed_lidar} to demonstrate the scan resolution. 
+
+\begin{figure}[!h]
+    \centering
+	\includegraphics[width=70mm, keepaspectratio]{figures/01_maxed_lidar.png}
+    \caption{Visualization of unfiltered LIDAR measurements maximized on 4 meters}
+    \label{fig:01_maxed_lidar}
+\end{figure}
+
+Cartographer in 2D mode projects all points inside a scan to the horizontal plane before 
+insertion and therefore it is not advisable to include points that are coming from ranges 
+that are hitting the floor or the ceiling. Only points that are coming from reflections 
+of objects should be included in the scans and saturated LIDAR measurements should be 
+discarded. During the bandwidth filter step, Cartographer filters the points and only 
+inserts the ones inside user set thresholds, others are discarded.
+
+To exclude points coming from unwanted elevations or saturation, 4 parameters are 
+adjusted in the configuration file: min\_z, max\_z to set the interval on z axis
+and min\_range, max\_range to set the range length interval. I have set min\_z and 
+max\_z values to -10cm and 50cm, min\_range and max\_range to 40cm and 370cm accordingly. 
+These settings proved to be working as expected and inserted ranges of the walls of 
+the building. Since scans of the whole sphere are published on two topics, these need to be 
+assembled into a single point cloud. This is done by Cartographer and is enabled by
+setting num\_accumulated\_range\_data to 2.
+
+IMU usage is enabled using the use\_imu\_data parameter and IMU data will be used as an 
+initial guess for the pose of the scan for insertion. Cartographer samples the 
+accelerometer values for a certain period of time to determine the direction of gravity.
+The quadcopter changes pitch and roll angles quickly, so imu\_gravity\_time\_constant is 
+set to 0.5 seconds to enable the algorithm to follow quick movements.
+
+After setting up the basic settings for interfacing Cartographer, the actual tuning of 
+the SLAM algorithm can be started. First the submap size need to be determined, that 
+depends on the sampling rate of the LIDAR sensor. It is important because a new submap 
+is built using constraints against the last two inserted submaps. 
+Setting submap size low will cause submaps to drift 
+or inadequate rotation due to lack of reference points. On the other hand setting submap
+size high doesn't allow global SLAM thread to rearrange submaps and calculate loop closures
+effectively. 
+
+\begin{figure}[!hb]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=70mm, keepaspectratio]{figures/01_SLAM_process_1.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=70mm, keepaspectratio]{figures/01_SLAM_process_2.png}}}$
+    \caption{2D SLAM map building on the left and complete map on the right}
+    \label{fig:01_2d_slam_mapping}
+\end{figure}
+
+For tuning local SLAM, global SLAM is disabled. In this case I found that lowering 
+translation\_weight and rotation\_weight under ceres scan matcher options increase the
+mapping quality. The submap size is set to 90 ranges that is a bit too dense, but
+due to the high sampling frequency and resolution it still created an adequate map
+as seen on figure \ref{fig:01_2d_slam_mapping}. Empty spaces are with white color and
+inserted scans are with black. The green points on the visualization are the points 
+from the last inserted scan and the small coordinate systems are at the pose where 
+a submap has been completed.
+
+Corners are sharp, walls are straight and even small details like columns are visible 
+on the final map. The big room on the top right of the map has three big windows and the drone
+was flying about in the height of them and that's the reason for the high quantity of
+empty space around this area. The algorithm was unable to insert points of the walls
+in between windows.
+
+Because there is no noise added to ranges, even without global SLAM, a decent quality 
+map can be built. If global SLAM is enabled, the linear\_search\_window parameter needs
+to be set to small, because the amount of drift of submaps is low. I have set the search 
+window to 25cm, so submaps cannot be moved further than 25cm. If it is left unchanged,
+submaps in range of 15 meters can be pulled together and would mess up the map.
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/01_trajectory.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/01_trajectory_coordinates.png}}}$
+    \caption{2D SLAM extracted trajectory against ground truth}
+    \label{fig:01_trajectory}
+\end{figure}
+
+The extracted trajectory closely follows the ground truth trajectory as seen on figure 
+\ref{fig:01_trajectory}. The RMS error on x axis is 24.6cm and a bit less 17cm on y axis,
+resulting in a cumulated 41.6cm RMS error.
+
+\begin{figure}[!h]
+    \centering
+	\includegraphics[height=65mm, keepaspectratio]{figures/01_trajectory_error.png}
+    \caption{Trajectory error on each axis}
+    \label{fig:01_trajectory_error}
+\end{figure}
+
+Figure \ref{fig:01_trajectory_error} shows the absolute error on the axes separately. The error 
+never goes above 1 meter on either axis and the fact that it always returns to 0 shows,
+that there is no drift in the pose estimation. It can also be seen on figure 
+\ref{fig:01_trajectory}, because on the way back the drones follows the same path
+and returns to the starting point.
+
 \subsection{2D SLAM with 4x4 resolution}
+In this scenario, the original rosbag is filtered to simulate 13 LIDAR sensors placed
+evenly on the horizontal axis as described in \ref{sect:lidar_layout_plan}, each with
+4x4 resolution. The visualization of the point cloud from a single scan can be seen on
+figure \ref{fig:02_lidar_layout}.
+
+\begin{figure}[!h]
+    \centering
+	\includegraphics[height=50mm, keepaspectratio]{figures/02_lidar_layout.png}
+    \caption{Visualization of ranges from 13 sensors with 4x4 resolution}
+    \label{fig:02_lidar_layout}
+\end{figure}
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=55mm, keepaspectratio]{figures/02_before_loop_closure.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=55mm, keepaspectratio]{figures/02_after_loop_closure.png}}}$
+    \caption{Map before and after tuning}
+    \label{fig:02_map}
+\end{figure}
+
+
+\subsection{2D SLAM with 3x3 resolution}
 TODO
+
 
 \section{3D SLAM evaluation}
 TODO
