@@ -3,6 +3,8 @@ In this chapter I'm introducing the planned steps towards building the previousl
 COVID-19 outbreak I have no access to the university laboratory when writing this thesis and therefore the planned 
 system cannot be built physically. 
 
+TODO
+
 \section{VL53L1X measurements} \label{sect:vl53l1x_measurements}
 In order to simulate the chosen VL53L1X sensor accurately, experience needs to be gained using the device. 
 There are several factors that affect the quality of the map produced by the SLAM algorithm. Choosing the right
@@ -84,6 +86,8 @@ a good understanding of the sensor and the effects on the SLAM performance.
         140 ms       & 1x1, 2x2, 3x3, 4x4      & Medium, Long       & 2.5 m \\
 		\hline
         140 ms       & 1x1, 2x2, 3x3, 4x4      & Medium, Long       & 3 m \\
+		\hline
+        140 ms       & 1x1, 2x2, 3x3, 4x4      & Long       & 3.5 m \\
 		\hline
         200 ms       & 1x1, 2x2, 3x3, 4x4      & Long       & 3.5 m \\
 		\hline
@@ -475,7 +479,7 @@ seen on figure.
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=130mm, keepaspectratio]{figures/cartographer_nodes.png}
+    \includegraphics[width=140mm, keepaspectratio]{figures/cartographer_nodes.png}
     \caption{Cartographer nodes and topics}
     \label{fig:cartographer_nodes}
 \end{figure}
