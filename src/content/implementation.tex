@@ -251,8 +251,8 @@ the maximum distance is lowered, while keeping the same layout of the sensors.
 After introducing all parameters the number of sensors is lowered until the lowest number 
 sensors is found, that is still capable of producing a decent quality map.
 
-
-\subsection{Unfiltered data}
+\subsection{Effects of LIDAR resolution}
+\subsubsection{Unfiltered data}
 In this step the range measurements inside the collected rosbag are converted to PointCloud2 
 without filtering and get written to a new bag. The LIDAR ranges visualized in 
 Rviz can be seen on figure \ref{fig:01_maxed_lidar} to demonstrate the scan resolution. 
@@ -297,8 +297,8 @@ effectively.
 
 \begin{figure}[!hb]
     \centering
-	$\vcenter{\hbox{\includegraphics[height=70mm, keepaspectratio]{figures/01_SLAM_process_1.png}}}$
-    $\vcenter{\hbox{\includegraphics[height=70mm, keepaspectratio]{figures/01_SLAM_process_2.png}}}$
+	$\vcenter{\hbox{\includegraphics[height=60mm, keepaspectratio]{figures/01_SLAM_process_1.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=60mm, keepaspectratio]{figures/01_SLAM_process_2.png}}}$
     \caption{2D SLAM map building on the left and complete map on the right}
     \label{fig:01_2d_slam_mapping}
 \end{figure}
@@ -333,8 +333,8 @@ submaps in range of 15 meters can be pulled together and would mess up the map.
 \end{figure}
 
 The extracted trajectory closely follows the ground truth trajectory as seen on figure 
-\ref{fig:01_trajectory}. The RMS error on x axis is 24.6cm and a bit less 17cm on y axis,
-resulting in a cumulated 41.6cm RMS error.
+\ref{fig:01_trajectory}. The RMS error on x axis is 6.3cm and a bit less 6.5cm on y axis,
+resulting in a cumulated 12.8cm RMS error.
 
 \begin{figure}[!h]
     \centering
@@ -344,16 +344,16 @@ resulting in a cumulated 41.6cm RMS error.
 \end{figure}
 
 Figure \ref{fig:01_trajectory_error} shows the absolute error on the axes separately. The error 
-never goes above 1 meter on either axis and the fact that it always returns to 0 shows,
+never goes above 25 centimeters on either axes and the fact that it always returns to 0 shows,
 that there is no drift in the pose estimation. It can also be seen on figure 
-\ref{fig:01_trajectory}, because on the way back the drones follows the same path
-and returns to the starting point.
+\ref{fig:01_trajectory}. Estimated and ground-truth coordinates overlap and produce a nicely 
+overlapping trajectory as on the left image.
 
-\subsection{2D SLAM with 4x4 resolution}
+\subsubsection{2D SLAM with 4x4 resolution}
 In this scenario, the original rosbag is filtered to simulate 13 LIDAR sensors placed
 evenly on the horizontal axis as described in \ref{sect:lidar_layout_plan}, each with
 4x4 resolution. The visualization of the point cloud from a single scan can be seen on
-figure \ref{fig:02_lidar_layout}.
+figure \ref{fig:02_lidar_layout}. 
 
 \begin{figure}[!h]
     \centering
@@ -362,24 +362,219 @@ figure \ref{fig:02_lidar_layout}.
     \label{fig:02_lidar_layout}
 \end{figure}
 
+The tuning of the SLAM algorithm with this setup wasn't more difficult, than it was with
+the previous setup, due to the high sampling rate and high number of points in each scan.
+For the local SLAM I have set the translation\_weight to 8 and rotation\_weight to 15. The
+reason for the increased weight is that otherwise the scan matcher algorithm was easily 
+moving and rotating scans to unreasonable positions. With the higher weights the initial
+guess of the pose has higher influence.
+
+To simulate the behavior of VL53L1X, ranges inside the sensor's field of view are averaged.
+This causes artifacts like curved corners and transition points that occur when an object is
+only partly in the field of view and another distant object covers the rest of the view. These 
+smooth transitions hide the sharp edges of walls, making it harder to insert points and to 
+find loop-closures.
+
 \begin{figure}[!h]
     \centering
 	$\vcenter{\hbox{\includegraphics[height=55mm, keepaspectratio]{figures/02_before_loop_closure.png}}}$
     $\vcenter{\hbox{\includegraphics[height=55mm, keepaspectratio]{figures/02_after_loop_closure.png}}}$
-    \caption{Map before and after tuning}
+    \caption{Map before and after tuning using 4x4 resolution}
     \label{fig:02_map}
 \end{figure}
 
+The final map after tuning is as seen on figure \ref{fig:02_map}. The left image shows the built 
+map before tuning and a failed loop-closure is seen in the top right of the map. The map on the 
+right at first glance is accurate, there are no major drifts in either rotation or placement. 
+Due to the averaging of field of view, corners are curved and the walls are not as sharp as 
+they were using the unfiltered data. Transition points are best visible in the small room 
+that opens from the big room. These are caused by the drone flying by the door and a part of
+a sensor's field of view hits the door post and the rest hits the wall behind. These ranges 
+are averaged to a single point in between the two objects. These points are always present 
+when the drone approaches a corner.
 
-\subsection{2D SLAM with 3x3 resolution}
-TODO
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/02_trajectory.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/02_trajectory_coordinates.png}}}$
+    \caption{2D SLAM extracted trajectory against ground truth using 4x4 resolution sensors}
+    \label{fig:02_trajectory}
+\end{figure}
+
+The estimated trajectory follows accurately the ground-truth trajectory as seen on 
+\ref{fig:02_trajectory}. As seen on the left picture, there is an offset between the two paths
+and seems like a constant offset, but as seen on figure \ref{fig:02_trajectory_error}, there is 
+no constant offset on neither axes.
+
+The RMS error of this setup is only 6cm more than the error of unfiltered data. The RMS error is 8.12cm
+on the x axis and 10.48cm on y axis, resulting in a cumulated error of 18.6cm.
+
+\begin{figure}[!h]
+    \centering
+	\includegraphics[height=65mm, keepaspectratio]{figures/02_trajectory_error.png}
+    \caption{Trajectory error on each axis using 4x4 resolution sensors}
+    \label{fig:02_trajectory_error}
+\end{figure}
+
+
+
+\subsubsection{2D SLAM with 3x3 resolution}
+As the resolution is lowered to 3x3, the field of view of each region of interest has broadened.
+This causes the artifacts coming from averaging to be more significant. An example for transition 
+points can be seen on figure \ref{fig:03_artifacts}. The number of ranges per scan is also lowered,
+so the ratio of transition points and wall hits increases and it heavily impacts the performance of
+Cartographer.
+
+\begin{figure}[!h]
+    \centering
+	\includegraphics[height=65mm, keepaspectratio]{figures/03_artifacts.png}
+    \caption{With wider field of view, the number of transition points increase}
+    \label{fig:03_artifacts}
+\end{figure}
+
+The tuned SLAM algorithm with sensors at a resolution of 3x3 seems to be stable and produces a 
+decent quality map. On the way back submaps started to drift in orientation compared to the 
+already inserted submaps, but global SLAM was able to compensate it and pulled submaps together.
+Another artifact is number of scans that could not be inserted properly into any submap and 
+therefore produced a tilted shadow of the wall in the top right corner of the map.
+
+\begin{figure}[!h]
+    \centering
+	\includegraphics[height=65mm, keepaspectratio]{figures/03_map.png}
+    \caption{Map produced by sensors on 3x3 resolution}
+    \label{fig:03_map}
+\end{figure}
+
+Although the mapping accuracy is reduced with the reduced sensor resolution, the localization
+accuracy has increased. The cumulated RMS error for this setup is 11.34cm. The RMS error on
+x axis is 4.04cm and on y axis it is 7.3cm. 
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/03_trajectory.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/03_trajectory_coordinates.png}}}$
+    \caption{2D SLAM extracted trajectory against ground truth using 3x3 resolution sensors}
+    \label{fig:03_trajectory}
+\end{figure}
+
+\begin{figure}[!h]
+    \centering
+	\includegraphics[height=65mm, keepaspectratio]{figures/03_trajectory_error.png}
+    \caption{Trajectory error on each axis using 3x3 resolution sensors}
+    \label{fig:03_trajectory_error}
+\end{figure}
+
+The accuracy of this setup is unexpected, because it contains less points per scan and more 
+the presence of transition points is significantly higher. I think the higher accuracy is due
+to the better tuning of Cartographer, because and shows the flaw of manual tuning and visual 
+inspection. Also shows the importance of tuning.
+
+\subsubsection{2D SLAM with 2x2 resolution}
+Compared to 3x3 resolution, in 2x2 each scan contains 66\% less points. A complete scan of 13 
+sensors consist of only 52 points that makes scan matching significantly less efficient. 
+Tuning of this setup was noticeably harder and the quality of the produced map has highly 
+decreased. 
+
+To compensate the scarce ranges inside scans, I have also run the simulation with lowered grid
+resolution from 5cm to 15cm. The difference of the two produced maps is seen on figure \ref{fig:04_map}.
+The lowered resolution resulted in a more consistent map, but the transient points are also better
+visible on this map.
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=55mm, keepaspectratio]{figures/04_map.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=55mm, keepaspectratio]{figures/04_map_lowres.png}}}$
+    \caption{Produced map using 5cm grid resolution on the left and 15cm on the right
+    using 3x3 resolution sensors}
+    \label{fig:04_map}
+\end{figure}
+
+By placing the trajectories side by side as on figure \ref{fig:04_trajectory}, the difference is 
+can be easily seen. While the configuration with high resolution grid map is able to follow the ground-truth
+trajectory in small rooms and the narrow corridor, it loses track in the big and spacious room, when the
+ranges are far apart. Lower resolution makes the SLAM algorithm more efficient mostly in the big room, but
+also has less drift and it is more stable.
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/04_trajectory.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/04_trajectory_lowres.png}}}$
+    \caption{Comparison of estimated trajectories using 5cm grid resolution on the left and 15cm 
+    on the right}
+    \label{fig:04_trajectory}
+\end{figure}
+
+The high resolution trajectory is at some points as far as 1.4m from the ground-truth pose, but the 
+cumulated RMS error is only 43.4cm. This shows that a seemingly small difference in RMS error can mean
+an error of more than a meter at a part of the trajectory. The low resolution trajectory in comparison 
+has a cumulated RMS error of 22.13cm. 7.95cm error on x axis and 14.17cm on the y axis.
+
+\newpage
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=55mm, keepaspectratio]{figures/04_trajectory_lowres_coordinates.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=55mm, keepaspectratio]{figures/04_trajectory_lowres_error.png}}}$
+    \caption{2D SLAM extracted trajectory against ground truth using 2x2 resolution sensors and 
+    15cm grid resolution}
+    \label{fig:03_trajectory}
+\end{figure}
+
+
+\subsubsection{2D SLAM with 1x1 resolution}
+By further lowering the resolution, each sensor has a single range measurement as output resulting in 13 
+range measurements per a complete scan. Such a low resolution hides most of the details and almost always 
+has multiple walls in its field of view. For example on 4m distance with a 27$^{\circ}$ angle, the field of 
+view opens to 1.8m. All ranges inside this wide field of view get averaged resulting in a single distance 
+measurement. On the corridor the drone flies in, ranges of a single sensor's scan can hit the two parallel 
+walls and also the wall at the end of the corridor. This scan will produce a floating point in the middle 
+of the corridor.
+
+Due to the high rate of the above mentioned artifacts, I was not able to tune the SLAM algorithm. With all 
+settings tried, the system proved to be instable and unreliable.
+
+\subsubsection{Summary}
+After running and tuning the SLAM algorithm on all resolutions, I can conclude that higher resolutions
+positively affect the stability and reliability of Cartographer. Lower resolution means broader field of 
+view that hides details like corners and edges, resulting poorer quality maps.
+
+Table \ref{tab:error_on_different_resolutions} shows the the RMS error for each resolutions I have tried.
+Surprisingly the setup with 3x3 sensors has a smaller RMS error, than the unfiltered setup or 4x4 setup.
+The reason for this might be because I have conducted these experiments in the same order as in this document
+and I have gained more experience in tuning of Cartographer by the time I have got to the experiment with 3x3
+resolution sensors. 
+
+\begin{table}[ht]
+	% \footnotesize
+	\centering
+	\begin{tabular}{||c c c c c c||}
+		\hline
+                            & Unfiltered    & 4x4     & 3x3     & 2x2     & 1x1 \\
+		\hline\hline
+        RMS error on x axis & 6.3cm         & 8.12cm  & 4.04cm  & 7.95cm  & -\\
+        \hline
+        RMS error on y axis & 6.5cm         & 10.48cm & 11.34cm & 14.17cm & -\\
+		\hline
+        Cumulated RMS error & 12.8cm        & 18.6cm  & 11.34cm & 22.13cm & -\\
+		\hline
+	\end{tabular}
+	\caption{RMS error on different resolutions}
+	\label{tab:error_on_different_resolutions}
+\end{table}
+
+
+\subsection{Effects of sampling rate}
+
+\subsection{Effects of maximum distance}
+
 
 
 \section{3D SLAM evaluation}
 TODO
 \subsection{Unfiltered data}
 TODO
-\subsection{1x1 resolution}
+\subsection{Evenly distributed LIDAR sensors}
 TODO
-\subsection{4x4 resolution}
+\subsection{Reduced set of evenly distributed LIDAR sensors}
 TODO
+\subsection{Asymmetric layout}
