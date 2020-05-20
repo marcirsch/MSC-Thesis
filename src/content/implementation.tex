@@ -114,7 +114,7 @@ completely.
     \label{fig:vl53l1x_meas_opmodes_std}
 \end{figure}
 
-\subsection{Detailed distance measurements}
+\subsection{Detailed distance measurements} \label{sect:vl53l1x_detailed_measurements}
 Based on the measurements described in the previous section, I chose a small set of LIDAR settings 
 to further investigate and see how these behave on different distances. These settings are 
 candidates to be used in simulations. The goal with the setting selection is to chose the ones
@@ -172,6 +172,9 @@ measurements.
 
 
 
+
+
+
 \subsection{Detailed measurements with the fastest setup}
 18.5ms timing budget with short distance preset can produce the fastest ranging measurements 
 up to 1.6m according to the datasheet. The short preset also has the best ambient light 
@@ -220,6 +223,13 @@ microcontroller that is not favorable in most applications.
 
 \newpage
 
+
+
+
+
+
+
+
 \section{2D SLAM evaluation}
 During the evaluation both in 2D and 3D the same collected data will be used. The length 
 of the collected rosbag is 144 seconds and contains all messages coming from all nodes on all
@@ -250,6 +260,16 @@ the maximum distance is lowered, while keeping the same layout of the sensors.
 
 After introducing all parameters the number of sensors is lowered until the lowest number 
 sensors is found, that is still capable of producing a decent quality map.
+
+
+
+
+
+
+
+\newpage
+
+
 
 \subsection{Effects of LIDAR resolution}
 \subsubsection{Unfiltered data}
@@ -349,6 +369,15 @@ that there is no drift in the pose estimation. It can also be seen on figure
 \ref{fig:01_trajectory}. Estimated and ground-truth coordinates overlap and produce a nicely 
 overlapping trajectory as on the left image.
 
+
+
+
+
+
+
+
+
+
 \subsubsection{2D SLAM with 4x4 resolution}
 In this scenario, the original rosbag is filtered to simulate 13 LIDAR sensors placed
 evenly on the horizontal axis as described in \ref{sect:lidar_layout_plan}, each with
@@ -418,6 +447,10 @@ on the x axis and 10.48cm on y axis, resulting in a cumulated error of 18.6cm.
 
 
 
+
+
+
+
 \subsubsection{2D SLAM with 3x3 resolution}
 As the resolution is lowered to 3x3, the field of view of each region of interest has broadened.
 This causes the artifacts coming from averaging to be more significant. An example for transition 
@@ -469,6 +502,11 @@ the presence of transition points is significantly higher. I think the higher ac
 to the better tuning of Cartographer, because and shows the flaw of manual tuning and visual 
 inspection. Also shows the importance of tuning.
 
+
+
+
+
+
 \subsubsection{2D SLAM with 2x2 resolution}
 Compared to 3x3 resolution, in 2x2 each scan contains 66\% less points. A complete scan of 13 
 sensors consist of only 52 points that makes scan matching significantly less efficient. 
@@ -509,8 +547,6 @@ cumulated RMS error is only 43.4cm. This shows that a seemingly small difference
 an error of more than a meter at a part of the trajectory. The low resolution trajectory in comparison 
 has a cumulated RMS error of 22.13cm. 7.95cm error on x axis and 14.17cm on the y axis.
 
-\newpage
-
 \begin{figure}[!h]
     \centering
 	$\vcenter{\hbox{\includegraphics[height=55mm, keepaspectratio]{figures/04_trajectory_lowres_coordinates.png}}}$
@@ -519,6 +555,9 @@ has a cumulated RMS error of 22.13cm. 7.95cm error on x axis and 14.17cm on the 
     15cm grid resolution}
     \label{fig:03_trajectory}
 \end{figure}
+
+
+
 
 
 \subsubsection{2D SLAM with 1x1 resolution}
@@ -532,6 +571,10 @@ of the corridor.
 
 Due to the high rate of the above mentioned artifacts, I was not able to tune the SLAM algorithm. With all 
 settings tried, the system proved to be instable and unreliable.
+
+
+
+
 
 \subsubsection{Summary}
 After running and tuning the SLAM algorithm on all resolutions, I can conclude that higher resolutions
@@ -563,9 +606,193 @@ resolution sensors.
 \end{table}
 
 
+
+
+
+
 \subsection{Effects of sampling rate}
+In the investigation of the effects of sampling rate, only two resolutions with the lowest RMS error
+are used. These resolutions are 4x4 and 3x3. In this test, the same LIDAR layout is kept as before,
+13 sensors evenly placed on the horizontal axis. Only one parameter is changed, that is the sampling 
+rate of each sensor. 
+
+For 4x4 resolution I chose the sampling time at 400ms, based on the measurements in section 
+\ref{sect:vl53l1x_detailed_measurements}. I chose the setup with a timing budget of 33ms over 18.5ms,
+because it has a lower sampling rate and if it works using this setting, it should be working with 
+higher sampling rate too.
+
+As for 3x3 resolution I chose the setup with the same sampling rate of 33ms. This setup has a sampling
+time of 220ms.
+
+
+
+
+
+
+\subsubsection{4x4 resolution}
+The dropped sampling rate from 30Hz to 2.5Hz is significant and makes tuning much harder. In previous
+simulations, the occupied\_space\_weight parameter was not at all or only slightly changed, but in this
+case this parameter proved to be the key parameter. This parameter sets how heavily Cartographer should 
+rely on already inserted points. The higher this value, the less flexible already inserted points are and 
+are less likely to be overwritten by new scans.
+
+As seen in the previous simulation that uses 2x2 resolution sensors, I have also tried in this case
+to lower the grid resolution to 15cm. The two completed maps are seen on figure \ref{fig:05_maps}.
+The quality of the map is decent in both cases, no major flaw is visible. In both cases global SLAM
+had to compensate rotation drifts, that occurred when the drone turned around in the big room. This 
+was in general a crucial point in the tuning procedure, most often submaps fell apart at this point.
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=50mm, keepaspectratio]{figures/05_map_highres.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=50mm, keepaspectratio]{figures/05_map_lowres.png}}}$
+    \caption{Maps built using 4x4 resolution sensors. 5cm grid resolution on the left and 
+    15cm resolution on the right}
+    \label{fig:05_maps}
+\end{figure}
+
+
+The two trajectories \ref{fig:05_trajectory} look similar, both follow the ground-truth trajectory
+closely. Low grid resolution produces a smoother path, while on high resolution there are some 
+edges and sharper turns. In general the configuration with 5cm grid resolution felt very unstable
+and that it can fall apart at any point. If submaps are built properly but misplaced relative to 
+each other, it can still be compensated by global SLAM, but in this case submaps fell apart, that
+cannot be compensated anymore.
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/05_trajectory.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/05_trajectory_lowres.png}}}$
+    \caption{Extracted trajectories using 4x4 resolution sensors. 5cm grid resolution on the left
+    and 15cm grid resolution on the right}
+    \label{fig:05_trajectory}
+\end{figure}
+
+The cumulated RMS error on 5cm grid resolution is 16.49cm and on 15cm resolution it is higher: 18.95cm.
+Higher resolution grid results in greater accuracy in position estimates, but its stability is lower
+in comparison to lower resolution.
+
+
+\subsubsection{3x3 resolution}
+The benefit of using 3x3 resolution setting for the LIDAR is the higher sampling rate. Using the 
+same timing budget of 33ms as for 4x4 resolution, the sampling time is 220ms in comparison to the 
+previous 400ms. This results an 80\% increase in update rate to 4.5Hz, that also means almost twice
+more often pose updates.
+
+Due to high instability I was unable to tune SLAM with 5cm grid resolution. Lowering the grid 
+resolution once again to 15cm, resolved the issue and the system felt reliable afterwards. The 
+produced map using higher grid size is on figure \ref{fig:06_trajectory}. The map quality is
+adequate, global SLAM almost haven't done any corrections.
+
+
+\begin{figure}[!h]
+    \centering
+	\includegraphics[height=50mm, keepaspectratio]{figures/06_map.png}
+    \caption{Map built using 3x3 resolution sensors and 220ms sampling time}
+    \label{fig:06_map}
+\end{figure}
+
+The extracted trajectory is seen on figure \ref{fig:06_trajectory}. The cumulated RMS error is 
+14.67cm, 6.4cm on x axis and 8.2 on y axis. Based on the stability and also accuracy 3x3 resolution
+seems like a better resolution for Cartographer SLAM. 
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/06_trajectory.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/06_trajectory_coordinates.png}}}$
+    \caption{Extracted trajectory using 3x3 resolution sensors and 220ms sampling rate}
+    \label{fig:06_trajectory}
+\end{figure}
 
 \subsection{Effects of maximum distance}
+The measurements with VL53L1X sensor showed that the each setup works accurately until 2.5m and each 
+has about 25cm drift at distance of 3m. I chose 2.75m as maximum distance for both 3x3 and 4x4 resolution 
+sensor simulations, because this is the distance reported by the sensor on 3m.
+
+The lowered maximum distance had a positive effect, that the number of transition points has been 
+reduced. This is because the shorter distance means that the field of view is shortened and cannot
+open as wide as it could before. The downside of the limited range is that the algorithm loses track
+in the big room, because it's longer than 5m and the two farther sides do not fit in a single scan.
+This caused more flaws on 4x4 resolution, while the other map looks similar to the one before
+the introduction of the distance limit. A small tilt can be observed that there is a slight tilt
+between the room on the right and the rest of the map. The produced maps using both 3x3 and 4x4 
+resolution setups are on figure \ref{fig:07_map}.
+
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=50mm, keepaspectratio]{figures/07_map_3x3_2_75d.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=50mm, keepaspectratio]{figures/07_map_4x4_2_75d.png}}}$
+    \caption{Maps produced by SLAM algorithm with 2.75m maximum distance and realistic sampling rate
+    enabled, 3x3 resolution on the left, 4x4 resolution on the right}
+    \label{fig:07_map}
+\end{figure}
+
+The trajectory using sensors with 3x3 resolution has a significant offset on y axis, that appeared
+after the drone exited the very first room. This offset is picked up, because with maximized distance
+the corridor appears to be open on both ends and without any reference points. Similar scans are pulled 
+together, resulting in a shortened corridor.
+
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/07_trajectory_3x3.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=65mm, keepaspectratio]{figures/07_trajectory_4x4.png}}}$
+    \caption{Extracted trajectories with 2.75m maximum distance and realistic sampling rate, 
+    3x3 resolution on the left and 4x4 resolution on the right}
+    \label{fig:07_trajectories}
+\end{figure}
+
+The trajectory using the setup with 4x4 resolution sensors has a smaller offset. Seems like with 
+more points per scan the SLAM algorithm was able to pick up small details and better track the 
+movement of the drone on this mostly even corridor. On the other hand it failed in the big room, 
+where the same situation appears. The stairs at the end of the room also make tracking harder,
+ranges from the stairs and the wall are hard to differentiate.
+
+The cumulated RMS error for 3x3 resolution is 45cm and 49.6cm for 4x4. In the end the mostly 
+constant offset with otherwise correct shape results in a smaller error, than the pose estimation 
+that follows ground-truth closely, but fails in shape at a relatively small area.
+
+
+
+
+\subsection{Reduced set of evenly distributed LIDAR sensors}
+The goal is to find the minimum number of LIDAR sensors, with which the SLAM algorithm still 
+works reliably and can produce a coherent map. To see the effect of reduction in the number of
+sensors, I have decided to halve the set and test the performance using only 6 sensors. The 
+sensors are evenly placed to cover the 360$^{\circ}$ horizontal plane.
+
+At first I used 4x4 resolution sensors with 400ms update rate and without limiting the maximum 
+distance. This means the maximum distance of each sensor is 4m.
+The produced map is almost as good as it was with 13 sensors, but tuning was difficult
+and it was sensitive to any small changes in weights. The cumulated RMS error of this setup is 
+37.32cm.
+
+\begin{figure}[!h]
+    \centering
+	$\vcenter{\hbox{\includegraphics[height=50mm, keepaspectratio]{figures/08_map_unlimited.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=50mm, keepaspectratio]{figures/08_trajectory_unlimited.png}}}$
+    \caption{Map and trajectory using 4x4 resolution sensor with 400ms sampling time and 4m distance limit}
+    \label{fig:08_map_unlimited}
+\end{figure}
+
+After tuning the setup without distance filter, I have used the same number of sensors and layout
+with distance filter enabled. The maximum distance is set to 2.75m as in previous simulations.
+The tuning of the algorithm is significantly harder, than it was without distance filter. 
+In the end I couldn't find any setting that would enable the mapping to work reliably. The 
+best produced map is on figure \ref{fig:08_failed_map}.
+
+
+
+\begin{figure}[!h]
+    \centering
+	\includegraphics[height=50mm, keepaspectratio]{figures/08_failed_map.png}
+    \caption{Failed mapping attempt with 4x4 resolution, 400ms sampling time and 2.75m 
+    maximum distance}
+    \label{fig:08_failed_map}
+\end{figure}
+
+
 
 
 
