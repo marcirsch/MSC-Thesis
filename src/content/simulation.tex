@@ -1,4 +1,4 @@
-\chapter{Components review} \label{chap:simulation}
+\chapter{Components review} \label{chap:components}
 Before actually building the system and experimenting on an expensive quadcopter in real world environment,
 it is cheaper, safer and easier to do tests in a simulated environment. 
 
@@ -6,8 +6,8 @@ The PX4 Firmware repository\cite{PX4Repository} contains Gazebo simulation files
 start in simulation of their product. Upon these simulation quadcopter models LIDAR sensors can be placed and 
 moved around with ease, without the need of wiring or external infrastructure. This simulation is 
 suitable for Software in the loop (SITL) testing, meaning that the same software developed for the simulation
-can be used on a real quadcopter with little or no modifications.
-
+can be used on a real quadcopter with little or no modifications. As for communication of the software components
+Robot Operating System will be used.
 
 
 \section{Robot Operating System}
@@ -165,6 +165,6 @@ measurements. The size of the laser receiving array can be programmatically chan
 region-of-interest(ROI) size. This way the sensor provides multizone operation and a higher resolution, than
 by using the whole SPAD array.
 
-I chose to use this sensor, because of its small size, availability in the university laboratory, low hardware infrastructure needs and 
-previous experience. 
+I chose to use this sensor, because of its small size, availability in the university laboratory, low hardware 
+infrastructure needs and previous experience. 
 

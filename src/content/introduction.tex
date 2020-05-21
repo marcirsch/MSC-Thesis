@@ -27,7 +27,7 @@ measure up to 100m.
 Localization and mapping of the environment for a small quadcopters can be challenging, because adding any extra equipment means
 extra weight that shortens flight time and changes flight behavior and the onboard computation capacity is limited. Rotating planar 
 scanners, that are also used in the above mentioned papers, undoubtedly provide highly accurate scans and therefore highly detailed maps.
-These LIDAR scanners are perfect for professional use and require reliably octo- or hexacopters to carry. 
+These LIDAR scanners are perfect for professional use and require reliable octo- or hexacopters to carry. 
 The popular Velodyne VLP-16 for example weighs 830g. Adding it to a quadcopter that is under 1kg means significant extra weight and the 
 drone might turn out to be uncapable of flying. 
 
@@ -36,24 +36,39 @@ extra equipment can be kept significantly lower, than using a 3D LIDAR scanner d
 in a layout that offers an optimal scan of the environment, therefore the movements of quadcopter during flight needs to be 
 taken into account to be able to scan the environment around the vehicle.
 
-In this thesis the design of a 3D positioning and mapping system is being discussed, that uses stationary 1D LIDAR sensors to 
+In this thesis the design of a 3D positioning and mapping system is being discussed, that uses stationary LIDAR sensors to 
 acquire distance measurements from an Unmanned Aerial Vehicle's (UAV) surrounding and uses SLAM technique to map its 
 surrounding, estimate its position and velocity. The goal is to provide a lightweight hardware and software alternative to 
-accurate planar LIDAR scanners, that are too heavy both computationally and physically for a UAV under 1kg. The focus during 
+accurate planar scanners, that are too heavy both computationally and physically for a quadcopter under 1kg. The focus during 
 the design is on the quality of the map and accuracy of the position estimates.
 
 In chapter \ref{chap:literature_review} basic aviation terminologies are introduced that will be used in the thesis, followed
 by introduction of SLAM techniques and similar products on the market. Visual SLAM techniques describe the use of monocular 
 cameras, stereo cameras or RGB-D cameras to be used for data acquisition, while ORB-SLAM and LSD-SLAM are two popular SLAM
 techniques for processing data coming from these sensors. Ranging sensors are non-visual sensors that can use sound
-or light to measure distance, like ultrasonic sensors or LIDAR sensors. Two interesting researches are discussed, that use 
-LIDAR scanners to improve position or map quality online. Cartographer SLAM is a is a software package that will be used
-for the first prototypes and to evaluate layout design of the stationary sensors, because it has compatibility with ROS
-system.
+or light to measure distance, like ultrasonic or LIDAR sensors. Two interesting researches are discussed, that use 
+LIDAR scanners to improve position or map quality online. The algorithm developed by google called Cartographer SLAM 
+is being introduced here. Cartographer is a is a software package that will be used for SLAM implementation and  to evaluate 
+layout design and settings of the stationary sensors. The algorithm will be used with the official ROS wrapper.
 
-In chapter \ref{chap:simulation} software components and their interaction is discussed, that will be used for future 
+In chapter \ref{chap:components} all necessary components and their task is discussed, that will be used in  
 simulations. Simulations help to evaluate sensors, layout designs and SLAM algorithms without the need to build the system
-physically.
+physically. 
+ 
+Chapter \ref{chap:system_design} gives an overview of VL53L1X LIDAR sensor produced by STMicroelectronics and describes the
+relevant operating modes that will be measured. Initial sensor layouts are proposed for both 2D and 3D SLAM operations. 
+Due to recent COVID-19 pandemic I haven't had access to laboratory equipment and had to cancel the building of the system on 
+an actual quadcopter. All measurements will be conducted in Gazebo simulator.
 
-The last chapter \ref{chap:system_design} gives an overview of the chosen LIDAR sensor for the first prototype, first designs 
+
+
+
+This chapter describes the setup of the simulation environment, the process of data recording 
+
+the chosen LIDAR sensor , first designs 
 of the layout of stationary sensors and a unit for collection of measurements from the sensors.
+
+
+
+
+TODO Complete introduction

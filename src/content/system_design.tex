@@ -1,9 +1,26 @@
 \chapter{System design plan} \label{chap:system_design}
-In this chapter I'm introducing the planned steps towards building the previously described system. Due to the 
-COVID-19 outbreak I have no access to the university laboratory when writing this thesis and therefore the planned 
-system cannot be built physically. 
+In this chapter I'm introducing the planned steps to build the previously described system. Due to the 
+recent COVID-19 pandemic I have no access to the university laboratory at the time I'm writing this thesis and 
+therefore the planned system is not built physically. 
 
-TODO
+In order to accurately simulate the selected VL53L1X LIDAR sensor, measurements need to be conducted in different 
+operating modes. Taking into consideration the parameters of the sensor, the number of sensors and the layout 
+can be estimated for both 2D and 3D usage.
+
+The only way to compare the performance of the LIDAR settings, layout and SLAM algorithm is to use the same
+dataset in every setup. For this reason I have placed a simulated LIDAR scanner on the top of the drone 
+that evenly scans the top hemisphere, and one sensor on the bottom that scans the bottom hemisphere. 
+The complete scan coming from the two sensors cover the whole sphere around the drone with ranges evenly
+distributed. The drone is flown around inside a building while LIDAR data is recorded into a rosbag file.
+
+The recorded rosbag from the previous step is then filtered to simulate the selected LIDAR layout and settings
+like maximum distance, sampling rate and field of view. The filtered data is played back to Cartographer SLAM
+that creates the map and pose estimates for the simulated setup and can be used for evaluation.
+
+To evaluate the performance the RMS error is calculated between the SLAM trajectory and the ground-truth
+trajectory. Ground-truth trajectory is provided by Gazebo.
+
+
 
 \section{VL53L1X measurements} \label{sect:vl53l1x_measurements}
 In order to simulate the chosen VL53L1X sensor accurately, experience needs to be gained using the device. 
@@ -633,7 +650,7 @@ compare the accuracy of different SLAM setups.
 
 \section{Complete workflow}
 
-\begin{figure}[!ht]
+\begin{figure}[!h]
     \centering
     \includegraphics[width=140mm, keepaspectratio]{figures/workflow.png}
     \caption{Complete workflow}
