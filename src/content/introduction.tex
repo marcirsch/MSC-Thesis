@@ -6,7 +6,8 @@
 % A bevezető tartalmazza a diplomaterv-kiírás elemzését, történelmi előzményeit, a feladat indokoltságát
 %  (a motiváció leírását), az eddigi megoldásokat, és ennek tükrében a hallgató megoldásának összefoglalását.
 
-% A bevezető szokás szerint a diplomaterv felépítésével záródik, azaz annak rövid leírásával, hogy melyik fejezet mivel foglalkozik.
+% A bevezető szokás szerint a diplomaterv felépítésével záródik, azaz annak rövid leírásával, hogy melyik 
+% fejezet mivel foglalkozik.
 
 
 A prerequisite for future expansion of mobile robots is the ability to navigate autonomously and safely in their ever-changing
@@ -20,27 +21,29 @@ by considering these two problems together and finding solutions simultaneously,
 The proposed issue by SLAM has many solutions depending on the use-case. SLAM technique can be used with a 
 focus on improving localization accuracy in GPS degraded environments, by fusing the outputs of a SLAM algorithm with GPS and
 IMU data \cite{hening20173d}. Or as presented in \cite{droeschel2018efficient}, the solution focuses on building highly accurate maps
-online of building interiors or even outdoors, but as a byproduct position becomes more accurate as well. The above mentioned 
-papers present a mapping approach that uses industrial-grade hexacopter and octocopter and the same precise LIDAR scanner that can
-measure up to 100m. 
+online of building interiors or even outdoors, but as a byproduct relative position becomes more accurate as well. The 
+above mentioned papers present a mapping approach that uses industrial-grade hexacopter and octocopter and the same 
+precise LIDAR scanner that can measure up to 100m. 
 
 Localization and mapping of the environment for a small quadcopters can be challenging, because adding any extra equipment means
-extra weight that shortens flight time and changes flight behavior and the onboard computation capacity is limited. Rotating planar 
-scanners, that are also used in the above mentioned papers, undoubtedly provide highly accurate scans and therefore highly detailed maps.
-These LIDAR scanners are perfect for professional use and require reliable octo- or hexacopters to carry. 
-The popular Velodyne VLP-16 for example weighs 830g. Adding it to a quadcopter that is under 1kg means significant extra weight and the 
-drone might turn out to be uncapable of flying. 
+extra weight that shortens flight time and changes flight behavior and the onboard computation capacity is usually limited. 
+Skydio2 \cite{SkydioWebsite} uses 6 fisheye cameras and processes the data onboard using a GPGPU to track a moving target
+while avoiding even the smallest branches in dense forests.
+Rotating planar scanners are the other common choice, that are also used in the above mentioned papers, undoubtedly 
+provide highly accurate scans and detailed maps. These LIDAR scanners are perfect for professional use and require reliable
+octo- or hexacopters to carry. The popular Velodyne VLP-16 for example weighs 830g. Adding it to a quadcopter that is under 
+1kg means significant extra weight and the drone might turn out to be uncapable of flying. 
 
 By using stationary LIDAR sensors placed around the quadcopter, these unwanted effects can be eliminated and the weight of 
-extra equipment can be kept significantly lower, than using a 3D LIDAR scanner discussed before. The sensors need to be placed
-in a layout that offers an optimal scan of the environment, therefore the movements of quadcopter during flight needs to be 
-taken into account to be able to scan the environment around the vehicle.
+extra equipment can be kept significantly lower, than using a 3D LIDAR scanner discussed before. This solution might also
+provide a cheap and computationally light alternative to camera or planar scanner based solutions. 
+The selected single-point sensors need to be placed on a drone in a layout that offers an optimal scan of the
+environment, therefore the movements of quadcopter during flight needs to be taken into account to be able to scan the
+environment properly around the vehicle.
 
-In this thesis the design of a 3D positioning and mapping system is being discussed, that uses stationary LIDAR sensors to 
-acquire distance measurements from an Unmanned Aerial Vehicle's (UAV) surrounding and uses SLAM technique to map its 
-surrounding, estimate its position and velocity. The goal is to provide a lightweight hardware and software alternative to 
-accurate planar scanners, that are too heavy both computationally and physically for a quadcopter under 1kg. The focus during 
-the design is on the quality of the map and accuracy of the position estimates.
+In this thesis the building and evaluation of a 3D positioning and mapping system is introduced, using Gazebo simulator. 
+The system uses stationary LIDAR sensors placed on a simulated quadcopter to acquire distance measurements from its 
+environment and uses SLAM technique to map its surrounding, estimate its position and produce an indoor map. 
 
 In chapter \ref{chap:literature_review} basic aviation terminologies are introduced that will be used in the thesis, followed
 by introduction of SLAM techniques and similar products on the market. Visual SLAM techniques describe the use of monocular 
@@ -48,27 +51,39 @@ cameras, stereo cameras or RGB-D cameras to be used for data acquisition, while 
 techniques for processing data coming from these sensors. Ranging sensors are non-visual sensors that can use sound
 or light to measure distance, like ultrasonic or LIDAR sensors. Two interesting researches are discussed, that use 
 LIDAR scanners to improve position or map quality online. The algorithm developed by google called Cartographer SLAM 
-is being introduced here. Cartographer is a is a software package that will be used for SLAM implementation and  to evaluate 
+is being introduced here. Cartographer is a is a software package that will be used for SLAM implementation and to evaluate 
 layout design and settings of the stationary sensors. The algorithm will be used with the official ROS wrapper.
-
-In chapter \ref{chap:components} all necessary components and their task is discussed, that will be used in  
-simulations. Simulations help to evaluate sensors, layout designs and SLAM algorithms without the need to build the system
-physically. 
+Lastly all necessary components of the simulation and their task is discussed. 
  
 Chapter \ref{chap:system_design} gives an overview of VL53L1X LIDAR sensor produced by STMicroelectronics and describes the
-relevant operating modes that will be measured. Initial sensor layouts are proposed for both 2D and 3D SLAM operations. 
-Due to recent COVID-19 pandemic I haven't had access to laboratory equipment and had to cancel the building of the system on 
-an actual quadcopter. All measurements will be conducted in Gazebo simulator.
+relevant operating modes to be tested and the methodology of the measurement. These results will be used to accurately simulate
+the sensors. In this chapter initial sensor layouts are proposed for both 2D and 3D SLAM operations.
 
+To be able to compare the performance of different SLAM algorithms, I chose to use the same data for the evaluation of 
+different setups and filter the LIDAR measurements to simulate different layouts. 
+To do so, two LIDAR sensors are placed on the simulated quadcopter to scan the whole sphere of the 
+surroundings of the drone. Data published to ROS during flight is collected into a rosbag, that contains the relevant 
+measurements, that are high resolution LIDAR ranges and IMU data. The LIDAR measurements inside this rosbag is then 
+filtered to simulate a certain number of VL53L1X sensors. Update rate, field of view and maximum ranging distance parameters
+from the planned sensor measurements will be used to simulate a sensor. The filtered data is fed to Cartographer SLAM
+that produces the map after proper tuning. 
 
+Chapter \ref{chap:implementation} describes the results of the VL53L1X measurements that was planned in previous chapter.
+VL53L1X LIDAR has an adjustable region of interest inside the field of view and by moving this region around the field of view,
+higher resolutions can be achieved from 1x1 to 4x4. It is yet unknown how different parameters affect the SLAM performance, 
+therefore these are introduced incrementally. 
 
+For 2D SLAM evaluation the same layout is used in all steps, 13 sensors evenly distributed on the horizontal 
+plane. At first the effects of different resolutions from 4x4 to 1x1 are evaluated, then 
+the effects of lowered sampling rate and lastly the effects of maximum ranging distance. The performance of each setup
+is determined by calculating RMS error between the estimated trajectory and the ground-truth trajectory, extracted 
+from the unfiltered dataset.
 
-This chapter describes the setup of the simulation environment, the process of data recording 
+The three introduced parameters are according to results of VL53L1X measurements described in the beginning of this chapter.
+Using the optimal settings, the number of sensors is decreased until the lowest number if found, that can still provide a 
+reliable SLAM performance. Instead of decreasing the number of sensors by one at each iteration, I chose
+to do logarithmic search.
 
-the chosen LIDAR sensor , first designs 
-of the layout of stationary sensors and a unit for collection of measurements from the sensors.
-
-
-
-
-TODO Complete introduction
+The above described evaluation methodology is used for 2D SLAM and the optimal LIDAR settings are used for the evaluation 
+of 3D SLAM. Just like in case of 2D, the sensor parameters are introduced one by one to see their effects independently 
+from each other. Lastly the number of sensors is decreased until the lowest number is found.

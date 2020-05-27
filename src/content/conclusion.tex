@@ -1,2 +1,46 @@
 \chapter{Conclusion}\label{chap:conclusion}
-TODO
+In this thesis I have researched the topic of indoor SLAM application using a set of cheap single-point 
+LIDAR sensors. I have used data collected from a single simulated flight to evaluate different sensor 
+layouts and settings, by filtering this flight data to simulate a certain number of VL53L1X sensors and 
+their parameters.
+
+I have measured the performance of VL53L1X sensor using different operating modes. I have determined 
+the maximum ranging distance, update rate and noise level of each operating mode. To investigate the 
+effects of different operating modes on the SLAM performance in 2D, I have used 13 sensors in even 
+layout on the horizontal plane and introduced each sensor parameter one by one.
+
+I have found that by increasing the sensor resolution to 3x3 or 4x4, the SLAM performance is increased
+and mapping works reliably. Sensor resolutions 1x1 and 2x2 have significantly higher update rate, but 
+using these settings, the SLAM algorithm became unreliable.
+
+As next I have investigated the effects of sampling rate and reduced it for resolutions 3x3 and 4x4 
+accordingly. After proper tuning of Cartographer, the accuracy of the two resolutions proved to be similar,
+while lower resolution provides more frequent pose estimates. Limiting the maximum distance of the two
+setups had a significant effect of the performance and Cartographer couldn't track the drone's position
+in wide open spaces anymore.
+
+After simulating all parameters of the sensors, I have decreased the number of LIDARS while keeping an
+even layout. The tracking proved to be accurate using at least 8 sensors in total.
+
+The evaluation of 2D SLAM performance helped the process of 3D evaluation. In this case I have also 
+chose an even layout and simulated 43 LIDARs in total and introduced each sensor parameter one by one.
+3D mapping worked both for 3x3 and 4x4 sensor resolutions reliable. Even with lowered sampling rate
+according to each resolution, the mapping quality proved to be adequate.
+At last I have limited the maximum range to 2.75m in both cases. The ranging limit caused the SLAM 
+algorithm to be unreliable and produced maps became messy.
+The fact that 3D SLAM is unreliable even with 43 sensors, proves that VL53L1X sensors and Cartographer
+SLAM cannot be used for 3D SLAM. Using higher number of sensors might increase the performance,
+but placing 43 sensors on a real-world drone is already unfeasible.
+
+At last I have tested the performance of 2D SLAM using 8 sensors, by mapping a different building 
+that has rooms of varying size. The algorithm performed well in small to mid sized rooms, but in open
+spaces it completely lost track and was not able to compensate this error. I have found that the system
+works reliably, when walls on all sides are in range of all the sensors. Therefore the maximum room size
+is 2.75x2.75m, where 2D SLAM using 8 VL53L1X sensors work reliably.
+
+
+
+
+
+
+

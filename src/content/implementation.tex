@@ -1,4 +1,4 @@
-\chapter{Implementation}
+\chapter{Implementation} \label{chap:implementation}
 In this chapter the implementation steps are introduced of the system described in 
 \ref{chap:system_design}. Two LIDAR sensors are placed on a simulated quadcopter in Gazebo, 
 that cover the top and bottom hemispheres around the drone. Using the data collected in the
@@ -1075,3 +1075,97 @@ During the above described experiments, I could not make Cartographer work in 3D
 included. In actual builds, the performance is expected to be worse. To compensate, adding more sensors
 would most likely improve the performance of the SLAM algorithm, but placing 43 sensors on a real-world 
 quadcopter is already not a feasible project.
+
+
+\section{SLAM performance on different building}
+So far the system implementation has only been tested on a single building and using the same dataset.
+To see the performance of the system, I have created a new building with different floor map as seen on
+figure \ref{fig:second_building_floormap}. The building has rooms with varying size and shape to test 
+SLAM performance in different scenarios.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[height=65mm, keepaspectratio]{figures/building2_floormap.png}
+    \caption{Floor map of second building built using unfiltered data}
+    \label{fig:second_building_floormap}
+\end{figure}
+
+As described at the end of the previous section, 3D configuration doesn't work reliably, therefore only 
+2D configuration will be used in this section. As for sensor settings I chose the configuration with 3x3
+resolution, because it provides higher update rate while it has similar performance to the 4x4 resolution
+alternative.
+
+During the tuning I found that the SLAM setup works well in smaller rooms, but loses track in the big 
+room, that messes up the previously built map. Even global SLAM is incapable of correcting these 
+errors, because these are contained inside submaps and not between submaps.
+
+To determine the limitations of the proposed LIDAR setup and Cartographer SLAM, I broke down the collected
+data to subsets that contain measurements only of the corridor and small rooms on the right, the top two 
+rooms and the big room.
+Figure \ref{fig:second_building_top_rooms} shows the mapping performance using data of the small rooms 
+and the corridor. The other image shows the map of the top medium sized rooms. Both maps are decent quality
+and the algorithm was able to track the drone during these flights.
+
+
+\begin{figure}[!ht]
+    \centering
+    $\vcenter{\hbox{\includegraphics[height=50mm, keepaspectratio]{figures/building2_small_room01.png}}}$
+    $\vcenter{\hbox{\includegraphics[height=50mm, keepaspectratio]{figures/building2_small_room02.png}}}$
+    \caption{Mapping performance in smaller rooms}
+    \label{fig:second_building_top_rooms}
+\end{figure}
+
+\newpage
+
+The next image on \ref{fig:second_building_main_transition} shows the transition from the corridor to the 
+main room. The maximum range of the sensors is 2.75m and the room is about 5m wide and almost 7m long, 
+therefore the LIDARs fail to pick up signal from both sides of the room in the same time. Due to the lack
+of reference a strong slip appears in the produced map, about 3m.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[height=65mm, keepaspectratio]{figures/building2_small_room03.png}
+    \caption{Mapping performance in smaller rooms}
+    \label{fig:second_building_main_transition}
+\end{figure}
+
+Figure \ref{fig:slam_in_open_space} shows the mapping process in 4 steps. The mapping quality is adequate 
+in confined spaces like on subfigures 1 and 2, but some slippage can be observed when the drone flies 
+around the wall in between two bay areas. The slippage becomes even greater when the drone flies out of 
+the second bay into a wide open space as seen on the third subfigure. At this point a tilt can also be 
+observed and the map becomes completely messy from this point. Submaps of the small rooms are still 
+correctly built, but are misplaced due to the error in the main room.
+
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}[b]{0.4\linewidth}
+      \includegraphics[width=0.9\linewidth]{figures/building2_open_01.png}
+       \caption{1.}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\linewidth}
+      \includegraphics[width=0.9\linewidth]{figures/building2_open_02.png}
+      \caption{2.}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\linewidth}
+      \includegraphics[width=0.9\linewidth]{figures/building2_open_03.png}
+      \caption{3.}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\linewidth}
+      \includegraphics[width=0.9\linewidth]{figures/building2_open_04.png}
+      \caption{4.}
+    \end{subfigure}
+    \caption{SLAM mapping process in open space with additional details}
+    \label{fig:slam_in_open_space}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
