@@ -7,7 +7,7 @@
 % Abstract in Hungarian
 %----------------------------------------------------------------------------
 \chapter*{Kivonat}\addcontentsline{toc}{chapter}{Kivonat}
-Dolgozatomban bemutatom TODO
+Dolgozatomban bemutatom 
 % Jelen dokumentum egy diplomaterv sablon, amely formai keretet ad 
 % a BME Villamosmérnöki és Informatikai Karán végző hallgatók által 
 % elkészítendő szakdolgozatnak és diplomatervnek. A sablon használata opcionális. 
@@ -22,31 +22,44 @@ Dolgozatomban bemutatom TODO
 % Abstract in English
 %----------------------------------------------------------------------------
 \chapter*{Abstract}\addcontentsline{toc}{chapter}{Abstract}
+In this thesis I propose a system that uses single point LIDAR sensors to scan a multicopter's environment and 
+build a 3D map of its surroundings using SLAM algorithm. The selected sensor is a VL53L1X time of flight LIDAR
+sensor developed by STMicroelectronics. Due to recent COVID-19 pandemic, I had no access to the laboratory 
+equipment. As a workaround I have used Gazebo simulator and simulated LIDAR measurements as close
+real VL53L1X measurements as possible. 
 
-I have reviewed basic aviation terminologies and similar products available on the market.
-Crazyflie Multi-ranger deck uses the same VL53L1X sensor that I chose and use 5 pieces for a SLAM application.
-Skydio2 is an autonomous drone that is capable of active tracking and object avoidance even in dense 
-forests. This drone uses 6 fisheye cameras for autonomous flight and it seems to be the most reliable 
-drone for autonomous tracking currently available.
+Different camera and ranging sensor based solutions can be found for SLAM applications. Ranging sensor Based
+setups mostly use heavy, sensitive but nonetheless highly accurate planar scanners. A solution for hobbyists 
+and students, called Crazyflie Multi-ranger deck uses the 5 pieces of the same VL53L1X sensor 
+for SLAM applications. Another product called Skydio2 is an autonomous drone that is capable of active 
+tracking and object avoidance even in dense forests, using 6 fisheye cameras to scan its environment. This 
+drone is the most reliable drone for autonomous tracking currently available.
 
-I have done literature review on different camera and ranging sensor based SLAM solutions. I chose PX4 
-firmware package to simulate a quadcopter, that uses Gazebo with ROS wrapper. I have found that Cartographer 
-SLAM is the optimal choice for my use case, because it is capable of 3D SLAM, while other ROS packages only 
-include 2D solutions.
+I have used PX4 repository that uses Gazebo to simulate an Iris drone and placed two LIDAR sensors on it,
+one on the top and one on the bottom. The two sensors make ranges of the surroundings evenly in a sphere 
+shape. LIDAR and IMU measurements are recorded into a Rosbag file. 
+Using a self-developed filtering script, I filter the recorded LIDAR measurements to simulate a number of 
+VL53L1X sensors in predefined orientation and settings. The settings are the resolution, update rate and
+maximum ranging distance. These parameters come from measurements done with the actual VL53L1X sensor.
+Offline processing using the Rosbag filter allows to rapidly test sensor settings and different layouts. 
+Because data of the same flight is used for all tests, their performance can be compared.
 
-Based on the literature review and the chosen main components, I have designed the necessary steps to
-build the planned system. I have selected the most relevant operating modes of VL53L1X LIDAR to be tested
-and designed a basic sensor layout for both 2D and 3D mapping. I have installed the necessary packages and
-created a working environment in Visual Studio Code to make development easier. The workspace contains 
-the PX4 firmware repository for simulations, Cartographer SLAM and necessary script, like a virtual remote
-controller.
 
-To be able to compare the performance of different SLAM algorithms, the same data needs to be used for All
-setups. To do so, I have placed two LIDAR sensors on the simulated quadcopter to scan the whole sphere of 
-the surroundings of the drone. ROS data of a flight is then collected into a rosbag, that contains the 
-relevant measurements, that are high resolution LIDAR ranges and IMU data. The LIDAR measurements inside 
-this rosbag is then filtered to simulate a certain number of VL53L1X sensors. Update rate, field of view 
-and maximum ranging distance parameters are used to simulate a single sensor.
+
+
+
+% I have done literature review on different camera and ranging sensor based SLAM solutions. I chose PX4 firmware
+% package to simulate a quadcopter, that uses Gazebo with ROS wrapper. I have found that Cartographer SLAM is the 
+% optimal choice for my use case, because it is capable of 3D SLAM, while other ROS packages only offer 2D 
+% SLAM.
+
+% Based on the literature review and the chosen main components, I have designed the necessary steps to
+% build the planned system. I have selected the most relevant operating modes of VL53L1X LIDAR to be tested
+% and designed a basic sensor layout for both 2D and 3D mapping. I have installed the necessary packages and
+% created a working environment in Visual Studio Code to make development easier. The workspace contains 
+% the PX4 firmware repository for simulations, Cartographer SLAM and necessary script, like a virtual remote
+% controller. 
+
 
 
 
