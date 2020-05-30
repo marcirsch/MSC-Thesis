@@ -3,17 +3,17 @@
 \section{Basic aviation terminologies}
 
 \subsection{UAV or Drone}
-UAV is short for Unmanned Aerial Vehicle, in other words an airborne vehicle that is capable of movement
+UAV is short for Unmanned Aerial Vehicle, in other words, an airborne vehicle that is capable of movement
 without having a pilot on board. Drone is a subset of UAV, a vehicle that is capable of autonomous flight.
-Usually UAV and the word Drone are used interchangeably in the literature, and it is used so in this thesis.
+Usually, UAV and the word Drone are used interchangeably in the literature, and it is used so in this thesis.
 
 \subsection{Body axes used in aviation}
-In aviation Euler angles are used to describe the orientation of an aircraft. Euler angles are three angles
+In aviation, Euler angles are used to describe the orientation of an aircraft. Euler angles are three angles
 that describe the orientation of a rigid body with respect to a fixed coordinate system. These axes are 
-referred to as Yaw, Pitch and Roll. Rotation around these axes are called Yaw, Pitch and Roll angles respectively.
+referred to as Yaw, Pitch, and Roll. Rotation around these axes are also called Yaw, Pitch, and Roll angles respectively.
 All three angles follow the right-hand rule. 
 
-Magnetic north is used as reference for Yaw, so an angle of 0$^\circ$ or 360$^\circ$ means that the vehicle
+Magnetic north is used as a reference for Yaw, so an angle of 0$^\circ$ or 360$^\circ$ means that the vehicle
 is heading North, 90$^\circ$ means it's heading East. Yaw is sometimes called Heading.
 
 \begin{figure}[!hb]
@@ -27,38 +27,38 @@ is heading North, 90$^\circ$ means it's heading East. Yaw is sometimes called He
 
 Pitch and Roll angles are calculated in reference to the horizontal plane. The normal vector of the horizontal 
 plane is used for the calculations, and it is the norm of the gravity vector. It is favorable to use the gravity
-vector, because its direction can be measured using an accelerometer. Both Roll and Pitch angles are measured
+vector because its direction can be measured using an accelerometer. Both Roll and Pitch angles are measured
 from -90$^\circ$ to 90$^\circ$. A Pitch of 90$^\circ$ is straight up and 0$^\circ$ is Horizon. If an aircraft
-flies with 0$^\circ$ Roll angle, the vehicle is horizontal, on the other hand a 90$^\circ$ Roll angle means
+flies with 0$^\circ$ Roll angle, the vehicle is horizontal, on the other hand, a 90$^\circ$ Roll angle means
 the vehicle is turning right and is perpendicular to the horizon. Pitch is sometimes referred to as Tilt.
 
 The limitation of using Euler angles is reached when Pitch or Roll angles approach 90$^\circ$, because in this 
 case one of these angles become parallel with the gravity vector and the other angle cannot be determined, 
-due to lack of reference.
+due to the lack of reference.
 Euler angles and singularities are well described in \cite{diebel2006representing}. To avoid singularities
 of Euler angles, Unit quaternions can be used. Quaternions are mainly used for calculations, while Euler 
 angles are used to provide humanly readable values.
 
 \subsection{Ground Control Station}
-A software running on a ground computer, used for receiving in-flight information via telemetry from a UAV.
-It displays status and progress of mission, that often includes sensor or video data. It can also be used
+Ground Control station is a software running on a ground computer, used for receiving in-flight information via telemetry from a UAV.
+It displays status and progress of the mission, which often includes sensor- or video data. It can also be used
 for sending commands up to the UAV during flight.
 
 Ground Control Station is often referred to as GCS.
 
 \subsection{Multicopters}
 Multicopter or Multirotor is a generic term to describe a UAV with more than two rotors. The term covers quadcopters,
-octocopters, hexacopters etc.
+octocopters, hexacopters, etc.
 
 Quadcopters are quickly gaining popularity thanks to their easy usability, and because of commercially available drones 
 that can be used for filming. Octocopters have eight rotors in total and mostly used by professionals. It provides a more stable 
-flight, can lift more weight and it is safer, because it can fly with any of the rotors damaged.
+flight, can lift more weight and it is safer because it can fly with any of the rotors damaged.
 
 \section{Simultaneous Localization And Mapping - SLAM}
 Simultaneous Localization And Mapping is the computational problem that asks if it is possible to place a robot 
 in an unknown environment and for the robot to incrementally build a consistent map of this environment while 
 simultaneously determining its position. A good overview of SLAM is presented in\cite{durrant2006simultaneous} 
-and \cite{diebel2006representing} focusing on finding a solution to the above proposed problem in general, with no dependency 
+and \cite{diebel2006representing} focusing on finding a solution to the above-proposed problem in general, with no dependency 
 on the type of sensor to be used.
 
 \begin{figure}[!ht]
@@ -69,8 +69,8 @@ on the type of sensor to be used.
 \end{figure}
 
 During SLAM a robot is placed in an unknown location and it is capable of estimating its trajectory and 
-location of all landmarks online, without the need of priori knowledge of the location. The robot makes relative
-observations of its surroundings, a number of unknown landmarks using sensors as seen on figure \ref{fig:slam_tutorial_basic}.
+location of all landmarks online, without the need for prior knowledge of the location. The robot makes relative
+observations of its surroundings, a number of unknown landmarks using sensors as seen in figure \ref{fig:slam_tutorial_basic}.
 The following quantities are defined at a time instant \emph{k}:
 \begin{itemize}
 	\item $\mathbf{x}_{k}$: State vector describing the location and orientation of the robot
@@ -84,14 +84,14 @@ The following quantities are defined at a time instant \emph{k}:
 \end{itemize}
 
 In probabilistic form of SLAM, the probability distribution function \ref{eq:slam_probability} needs to be computed for
-all times \emph{k}. In other words the current state vector and the landmark location probabilities need to be calculated
+all times \emph{k}. In other words, the current state vector and the landmark location probabilities need to be calculated
 based on all \emph{k} observations, control vectors and the initial state of the robot.
 
 \begin{equation} \label{eq:slam_probability}
     P\left ( \mathbf{x}_{k},\mathbf{m}\mid \mathbf{Z}_{0:k},\mathbf{U}_{0:k},\mathbf{x}_{0}\right )
 \end{equation}
 
-A recursive solution is desirable for the SLAM problem. Starting with an estimate for the posteriori distribution 
+A recursive solution is desirable for the SLAM problem. Starting with an estimate for the posterior distribution 
 (equation \ref{eq:slam_probability_posteriori}) at time \emph{k}-1, then a control vector $\mathbf{u}_{k}$ is used to
 estimate the next state and observations using Bayes theorem. This calculation requires an observation model and a 
 state transition model.
@@ -112,7 +112,7 @@ $\mathbf{z}_{k}$ given the current robot and landmark locations.
 The state transition model \ref{eq:slam_motion_model} describes the probability of the next position of the robot 
 based on the previous state and the control vector at time \emph{k}. The state transition is assumed to be a Markov
 process, so the next state $\mathbf{x}_{k}$ depends only on the current state $\mathbf{x}_{k-1}$ applied control 
-$\mathbf{u}_{k}$. $\mathbf{x}_{k}$ is also independent from both landmark locations $\mathbf{m}$ and observations
+$\mathbf{u}_{k}$. $\mathbf{x}_{k}$ is also independent of both landmark locations $\mathbf{m}$ and observations
 $\mathbf{z}_{k}$.
 
 \begin{equation} \label{eq:slam_motion_model}
@@ -121,7 +121,7 @@ $\mathbf{z}_{k}$.
 
 Using equations \ref{eq:slam_probability_posteriori}, \ref{eq:slam_observation_model} and \ref{eq:slam_motion_model},
 the SLAM algorithm can now be described using a two-step recursive form: prediction and correction.
-The prediction step or time-update is used for estimating the next state and map, based on all posteriori observations,
+The prediction step or time-update is used for estimating the next state and map, based on all posterior observations,
 control vectors and initial state. 
 
 \begin{equation} \label{eq:slam_time_update}
@@ -160,20 +160,20 @@ dependent on each other and need to be solves simultaneously. In the early stage
 were tried to be solved independently and work often focused on either of them. Once the realization came that combined 
 mapping and localization can be formulated as a single estimation problem, the problem became convergent.
 
-Many solutions can be found for probabilistic SLAM problem, the most common is the use of the extended Kalman
+Many solutions can be found for the probabilistic SLAM problem, the most common is the use of the extended Kalman
 filter (EKF) that provides an optimal estimation to non-linear models with additive Gaussian noise. The motion
 model can also be represented with a non-Gaussian probability distribution, that leads to the use of the 
 Rao-Blackwellized particle filter, or FastSLAM algorithms.
 
 
-The above introduced SLAM problem was a general introduction, it is not dependent on the sensor used for observations.
-Many kind of observers can be used for this purpose, but the two main categories are camera based and ranging sensor based.
-Visual observers mostly use simple or special camera configurations for depth sensing, while ranging sensor based observers 
-use a physical phenomena to measure distances like sonars or LIDARS.
+The above-introduced SLAM problem was a general introduction, it is not dependent on the sensor used for observations.
+Many kinds of observers can be used for this purpose, but the two main categories are camera- and ranging sensor-based.
+Visual observers mostly use simple or special camera configurations for depth sensing, while ranging sensor-based observers 
+use a physical phenomenon to measure distances like sonars or LIDARS.
 
 \subsection{Visual SLAM}
 Visual SLAM is a subset of SLAM algorithms that processes camera images to determine the camera's position and orientation
-relative to its surroundings, while building a map of its environment. In the simplest case a monocular camera is used
+relative to its surroundings while building a map of its environment. In the simplest case, a monocular camera is used
 to collect images, but more advanced active or passive stereo cameras and RGB-D cameras are also used. A pro of using
 images for SLAM is that images contain high amounts of data, therefore very detailed maps can be made. On the other hand,
 processing big amounts of data means higher complexity and demands higher processing capabilities.
@@ -181,15 +181,15 @@ processing big amounts of data means higher complexity and demands higher proces
 
 Two main categories of visual techniques are feature-based and direct SLAM algorithms. Feature-based techniques detect
 certain key-points called features in images, like corners and edges, and only use these features to extract depth information.
-Direct SLAM algorithms however don't search for features, but use the regions of high intensities on the image to estimate the 
+Direct SLAM algorithms however don't search for features but use the regions of high intensities on the image to estimate the 
 location and surroundings. Two popular visual SLAM methods are feature-based ORB-SLAM and direct LSD-SLAM.
 
 \subsubsection{Monocular camera}
-The pro of using monocular camera for localization and mapping is that each image contains high density of information and
-cameras will always be cheaper easier to use than other depth sensing camera rigs. 
-A big pro, but in the same time a big con of using a monocular camera for SLAM is that a single camera cannot detect the scale.
+The pro of using a monocular camera for localization and mapping is that each image contains high-density of information and
+cameras will always be cheaper easier to use than other depth-sensing camera rigs. 
+A big pro, but at the same time, a big con of using a monocular camera for SLAM is that a single camera cannot detect the scale.
 It is an advantage, because the same camera can be used indoor on a small scale even down to centimeters, and used outdoors on
-a scale of kilometers. Nonetheless during transmission between these scales, the scale can drift and therefore size of
+a scale of kilometers. Nonetheless, during transmission between these scales, the scale can drift, and therefore size of
 landmarks will not be presented correctly. This is called scale-drift, that algorithms try to compensate.
 
 \begin{figure}[!ht]
@@ -207,8 +207,8 @@ the images taken by these cameras. To find correlations between the two images s
 present on the images, therefore light conditions affect the performance of depth-sensing. This technique is also called
 passive stereo vision.
 
-Active stereo cameras solve this problem employing a projector onboard, that projects a structured light to simplify the 
-stereo matching problem. Using this technique the depth sensing performance is less affected by lighting conditions and 
+Active stereo cameras solve this problem by employing a projector onboard, that projects a structured light to simplify the 
+stereo matching problem. Using this technique the depth-sensing performance is less affected by lighting conditions and 
 reoccurring patterns will not confuse the matching of the images.
 
 \begin{figure}[!ht]
@@ -225,9 +225,9 @@ reoccurring patterns will not confuse the matching of the images.
 
 LSD-SLAM for monocular cameras were proposed in \cite{engel2014lsd} and for stereo or RGB-D cameras in \cite{engel2015large}.
 LSD stands for Large-Scale Direct SLAM and it can be seen by the name that it is a direct SLAM algorithm.
-The map of the surroundings is created based on keyframes that consists of three fields, a camera image, an inverse depth map
+The map of the surroundings is created based on keyframes that consist of three fields, a camera image, an inverse depth map,
 and the variance of the inverse depth map. The solution of the problem proposed by SLAM is divided into three parts: tracking,
-depth map estimation and map optimization as seen on figure \ref{fig:lsd_slam_overview}.
+depth map estimation, and map optimization as seen in figure \ref{fig:lsd_slam_overview}.
 
 
 \begin{figure}[!ht]
@@ -239,12 +239,12 @@ depth map estimation and map optimization as seen on figure \ref{fig:lsd_slam_ov
 
 New images are input during the tracking phase and the position is estimated with respect to the current keyframe from 
 previous iteration. The depth map estimation component uses tracked frames to either refine or replace the current keyframe.
-If the camera has moved more than a set threshold, a new keyframe is initialized with the combination of current and new 
+If the camera has moved more than a set threshold, a new keyframe is initialized with the combination of the current and the new 
 keyframe. If the tracked keyframe is not taken, then it is used to refine the current keyframe by performing small-baseline 
 stereo comparisons and regularization of the depth map. Once the current keyframe is updated, it is built into the global map,
-by the map optimization.
+by map optimization.
 Keyframes that are close to each other can be detected and closed, this process is called loop-closure. For loop closures and
-scale-drift compensation, similarity transform is used. The map is further optimized using using pose graph optimization from 
+scale-drift compensation, a similarity transform is used. The map is further optimized by using pose graph optimization from 
 g2o package.
 
 \subsubsection{ORB-SLAM}
@@ -254,10 +254,10 @@ loop closing.
 
 The tracking phase is responsible for localizing the camera and to decide when to insert a new keyframe.
 The features extracted from the new image are FAST corners, where FAST is a computationally efficient process to find corners
-on images. These corners are described using ORB, that is a method to describe FAST corners by a center of mass and
-an orientation parameter. This way the place and orientation is known of each feature. The initial pose is estimated using 
+on images. These corners are described using ORB, which is a method to describe FAST corners by a center of mass and
+an orientation parameter. This way the place and orientation are known for each feature. The initial pose is estimated using 
 a constant velocity model and if the tracking is lost, relocation is done instead of pose estimation.
-Track local map is a map of keyframes that share a common map point. Finally it is decided if new keyframe is need to be
+Track local map is a map of keyframes that share a common map point. Finally, it is decided if new keyframe needs to be
 created.
 
 
@@ -269,29 +269,27 @@ created.
 \end{figure}
 
 
-In the first step of local mapping the new keyframe is inserted into the co-visibility graph and it is linked keyframe to keyframe
+In the first step of local mapping, the new keyframe is inserted into the co-visibility graph and it is linked keyframe to keyframe
 with the most points in common. ORB features from the connected keyframes are used to calculate new map points using triangulation. 
 Unmatched ORBs are compared with other unmatched ORBs of other keyframes. Projection error and consistency is checked, then the 
 map is projected to the matched keyframes. The new map points need to be validated, by going through a test to increase the 
-likelihood that these map points are valid part of the map. In local bundle adjustment step, the current keyframe and connected
-keyframes through the co-visibility graph are optimized. Finally abundant keyframes get discarded to keep simplicity.
-
+likelihood that these map points are a valid part of the map. In the local bundle adjustment step, the current keyframe and connected
+keyframes through the co-visibility graph are optimized. Finally, abundant keyframes get discarded to keep simplicity.
 Loop closing is quite effective in ORB-SLAM, because matching ORBs can be done with relatively high confidence.
-Similarity transformation is calculated.
 
-\subsection{Ranging sensor based SLAM}
+\subsection{Ranging sensor-based SLAM}
 Cameras are cheap, popular and can be used to create highly detailed maps, but they produce high amounts of data that demands 
-high processing capabilities. Ranging sensor based approaches produce lower amount of data that is dependent on the scale, these 
+high processing capabilities. Ranging sensor-based approaches produce a lower amount of data that is dependent on the scale, these 
 sensors have a minimum and maximum range they can measure in between.
 
 Ultrasonic sensors have been used for distance measurements for many years, but they suffer from significant
-measurement noise, that comes from background noise and the variability of speed of sound. Almost no development has been seen on
-ultrasonic sensors in the previous years LIDAR sensors on the other hand are actively developed, because this technique
-uses light to measure distance, offer more accurate measurements, typically lower form factor, higher resolution and update rates. 
-LIDAR sensors are also significantly more expensive than most of ultrasonic sensors and camera based SLAM systems.
+measurement noise, that comes from background noise and the variability of the speed of sound. Almost no development has been seen on
+commercially available ultrasonic sensors in the previous years LIDAR sensors on the other hand are actively developed, because this technique
+uses light to measure distance, offer more accurate measurements, typically lower form factor, higher resolution, and update rates. 
+LIDAR sensors are also significantly more expensive than most of ultrasonic sensors and camera-based SLAM systems.
 
 A planar laser scanner is a LIDAR sensor that is extended to make distance measurements in 2D. Typically it is used for 
-scanning the horizontal plane. Usually the scanning is solved by rotating a LIDAR sensor in 360$^\circ$ while it is 
+scanning the horizontal plane. Usually, the scanning is solved by rotating a LIDAR sensor in 360$^\circ$ while it is 
 making measurements evenly distributed on the plane. Planar scanners are good for building floor maps and navigating in indoor 
 environments. Some scanners are further extended for 3D scanning.
 
@@ -308,19 +306,19 @@ to have a more accurate estimation of the absolute position and velocity of a UA
 \end{figure}
 The LIDAR scanner provides local position updates using SLAM technique, GPS provides corrections when available and an Internal
 Navigation System is used as an additional input to the Adaptive Extended Kalman filter. The outline of the filter can be seen 
-on figure \ref{fig:haning_filter}.
+in figure \ref{fig:haning_filter}.
 
 
 
-The 3D LIDAR scanner used is Velodyne VLP-16, that has a vertical field of view of 30$^\circ$ with a vertical resolution 
-of 2$^\circ$. On the horizontal axis the resolution is 0.1-0.4$^\circ$ and rotation rate can be adjusted between 5-20Hz.
+The 3D LIDAR scanner used is Velodyne VLP-16, which has a vertical field of view of 30$^\circ$ with a vertical resolution 
+of 2$^\circ$. On the horizontal axis, the resolution is 0.1-0.4$^\circ$ and rotation rate can be adjusted between 5-20Hz.
 The sensor weighs 830g according to the company website.
 
-During the experiment an octocopter is used to carry the sensor. Octocopters are stable and can carry high amounts of weight.
+During the experiment, an octocopter is used to carry the sensor. Octocopters are stable and can carry high amounts of weight.
 The proposed filter is capable of reducing the GPS drift of 24.3m and LIDAR drift of 7.5m to 3.42m.
 This shows that fusing GPS, LIDAR and IMU measurements result in a more accurate position estimate in
 GPS-degraded environments. The capabilities of the LIDAR was also tested on an even moon-like surface, 
-with very few landmarks that can be used by the SLAM algorithm. In this case GPS data is much more 
+with very few landmarks that can be used by the SLAM algorithm. In this case, GPS data is much more 
 accurate than LIDAR SLAM, therefore LIDAR data is not used for calculation of position updates in these cases.
 
 
@@ -334,10 +332,10 @@ accurate than LIDAR SLAM, therefore LIDAR data is not used for calculation of po
 
 
 \subsubsection{3D LIDAR SLAM for mapping}
-The solution seen in \ref{lidar_for_localization} uses a LIDAR scanner to improve position and velocity data, by fusing the output 
+The solution is seen in \ref{lidar_for_localization} uses a LIDAR scanner to improve position and velocity data, by fusing the output 
 of SLAM algorithm with sensors. The map created simultaneously is not used in that solution. 3D LIDAR data and SLAM can be also used 
 to create highly detailed maps and this paper presented by David Droeschel and Sven Behnke \cite{droeschel2018efficient}, discusses
-an efficient implementation of SLAM with focus on improving online mapping quality.
+an efficient implementation of SLAM with the focus on improving online mapping quality.
 
 \begin{figure}[!ht]
     \centering
@@ -355,14 +353,14 @@ an efficient implementation of SLAM with focus on improving online mapping quali
 \end{figure}
 
 The system first aggregates range measurements into a robot-centric grid-map \cite{droeschel2014local}, that has high resolution
-in the close proximity and lower resolution with increasing distance. A grid cell stores the cell's occupancy probability and a
+in the proximity and lower resolution with increasing distance. A grid cell stores the cell's occupancy probability and a
 surface element(surfel), that describes the mean of samples and covariance. IMU or odometry measurements are used to account for 
-motion of the sensor during acquisition, to compensate rolling shutter artifacts. After the preprocessing step, surfels become 
+the motion of the sensor during acquisition, to compensate rolling shutter artifacts. After the preprocessing step, surfels become 
 registered and the local map is updated. The older local map measurements are overwritten with the current 3D scan. During 
-allocentric mapping phase, the 3D local multiresolution maps from different view poses are aligned with each other using surfel
+the allocentric mapping phase, the 3D local multiresolution maps from different view poses are aligned with each other using surfel
 based registration. Local maps that are registered to the SLAM graph are subject to refinement. During these steps, the scans 
-are refined based on available local maps, then graph and sensor trajectories are also refined. Local mapping, allocentric mapping
-and refinement phases are independent from each other, so these can run parallel.
+are refined based on available local maps, then graph and sensor trajectories are also refined. Local mapping, allocentric mapping,
+and refinement phases are independent of each other, so these can run parallel.
 
 \begin{figure}[!ht]
     \centering
@@ -375,7 +373,7 @@ and refinement phases are independent from each other, so these can run parallel
 \subsection{Cartographer SLAM}
 Cartographer is a system developed by Google that provides real-time simultaneous localization and mapping
 in 2D and 3D across multiple platforms and sensor configurations. Cartographer is used by Google street view
-for mapping of building interiors, using a backpack mounted LIDAR scanner.
+for mapping of building interiors, using a backpack- mounted LIDAR scanner.
 
 There are officially available SLAM packages in ROS, the most popular packages are Gmapping, Cartographer and 
 Hector SLAM. For the scope of this thesis, only ROS compatible packages are being concerned. Gmapping and Hector
@@ -392,16 +390,16 @@ of handling the selected sensors, other SLAM algorithms can be considered.
 
 
 
-On the other hand Cartographer ROS package supports both 2D and 3D SLAM and has a great and active community. The overview 
-of Cartographer is seen on figure \ref{fig:cartographer_slam_overview}. The core components are sensor inputs, Local SLAM
-and Global SLAM. On a higher abstraction the job of local SLAM is to build submaps and the job of global SLAM is to tie 
-submaps the most consistently together. It is common to build submaps or local maps in SLAM implementations, because by 
+On the other hand, Cartographer ROS package supports both 2D and 3D SLAM and has a great and active community. The overview 
+of Cartographer is seen in figure \ref{fig:cartographer_slam_overview}. The core components are sensor inputs, Local SLAM,
+and Global SLAM. On a higher abstraction, the job of local SLAM is to build submaps and the job of global SLAM is to tie 
+submaps the most consistently together. It is common to build submaps or local maps in SLAM implementations, because
 updating the whole map increases complexity quadratically, but by using local maps or submaps the complexity can be limited
 to the contents of the submap that is preferable during online processing. In this case alignment of submaps needs to be solved,
 but it requires less processing and it can be run in parallel.
 
 The most important input of Cartographer is the Range Data, range measurements coming from LIDAR sensors. The data is first 
-pre-filtered, because some measurements are irrelevant, the sensor might be directed to a part of the robot or it can be covered
+pre-filtered because some measurements are irrelevant, the sensor might be directed to a part of the robot or it can be covered
 by dust, and some sensors set unsuccessful range measurements to a value that is significantly higher than the maximum range of 
 the sensor. These outliers need to be filtered and Cartographer uses a bandpass filter for pre-filtering, that keeps the values
 in a predefined range. The minimum and maximum values need to be set according to the sensor specifications. 
@@ -414,8 +412,8 @@ Inertial Measurement Units (IMU) provide a direction of gravity vector and a noi
 has to be provided for 3D SLAM because it greatly reduces complexity of scan matching, while IMU data is optional for 2D SLAM.
 Odometry Pose and Fixed Frame Pose are optional inputs of Cartographer, that can further reduce complexity.
 
-In Local SLAM phase, first scans are inserted into a submap at the best estimated position. Scan matching is done only against
-current submap and not against the global map. During this process the error of pose estimates accumulate in the world frame. 
+In the Local SLAM phase, first scans are inserted into a submap at the best estimated position. Scan matching is done only against
+the current submap and not against the global map. During this process, the error of pose estimates accumulates in the world frame. 
 To reduce the accumulated error over time, pose optimization is run regularly. All finished submaps are considered for loop 
 closure, that happens on a background thread Global SLAM.
 
@@ -435,7 +433,7 @@ closure, that happens on a background thread Global SLAM.
 
 \subsection{Terabee TeraRanger Tower} \label{sect:TerabeeDescription}
 TeraBee offers an off-the-shelf solid-state LIDAR system with the purpose of collision avoidance for drones.
-In their solution 8 sensors are evenly distributed around the vertical axis with a controller board in 
+In this solution, 8 sensors are evenly distributed around the vertical axis with a controller board in 
 the middle. TeraRanger's interface is compatible with Pixhawk 4 flight controller board and 
 PX4 flight controller software, that makes integration easy into systems based on these components.
 
@@ -449,7 +447,7 @@ PX4 flight controller software, that makes integration easy into systems based o
 
 Each block of the array is a standalone LIDAR sensor, that can be used separately and supports different
 mount configurations. The company offers a long-range and fast-ranging version of these sensors and depending 
-on the type an update rate of 320 Hz can be achieved. The fact that system comes with a ROS package and a 
+on the type an update rate of 320 Hz can be achieved. The fact that the system comes with a ROS package and a 
 2$^{\circ}$ field of view makes it a potential candidate for indoor mapping and positioning in two dimensions. 
 The price of this setup starts from 599 euro\cite{TerabeeTeraRanger}.
 
@@ -474,16 +472,16 @@ Terabee provides a tutorial video on their website\cite{TerabeeTeraRanger} how t
 sensor array to a UAV that uses Pixhawk 4 flight controller and the process of configuration 
 in two different GCS programs. I have learned that PX4 flight stack supports lidar measurements
 for obstacle avoidance and it can be configured from a GCS program. It seems a reasonable choice 
-to integrate this feature into such product.
+to integrate this feature into such a product.
 
 \subsection{Crazyflie Multi-ranger deck}
 The company Bitcraze has developed a mini quadcopter mainly for educational purposes. The current version is
-called Crazyflie 2.1 and measures only 92x92mm with a height of 29mm and a weighs 27g.
+called Crazyflie 2.1 and measures only 92x92mm with a height of 29mm and weighs 27g.
 Extra sensors and peripherals can be attached to the top of the quadcopter using extension boards.
 
 The extension board called Multi-ranger deck has 5 VL53L1X sensors by STMicroelectronics facing forwards, 
-backwards, left, right and up. This project is similar to the product of Terabee described in \ref{sect:TerabeeDescription}, 
-but in a smaller size factor and with significantly lower weight.
+backward, left, right, and up. This project is similar to the product of Terabee described in \ref{sect:TerabeeDescription}, 
+but in a smaller size factor and with a significantly lower weight.
 
 An introduction video can be found on the product website \cite{BitcrazeMultirangerDeck}, where 
 a SLAM algorithm is used to create a map and localize the drone. This serves as a proof of concept,
@@ -502,9 +500,9 @@ no information of the SLAM algorithm used or from the quality of the map.
 
 \subsection{Skydio 2}
 Skydio 2 is a quadcopter built for autonomous tracking for filming purposes. This drone was released 
-in November 2019 soon after I have started working on this thesis. It is equipped with 6 wide angle 
-cameras besides the main camera that capture the vehicle's environment with 500Hz update rate and 
-process it in real time onboard. \cite{SkydioWebsite}
+in November 2019 soon after I have started working on this thesis. It is equipped with 6 wide-angle 
+cameras, besides the main camera, that capture the vehicle's environment with a 500Hz update rate and 
+process it in real-time onboard. \cite{SkydioWebsite}
 
 The drone uses the data coming from the cameras to avoid obstacles and to follow the target that is 
 being tracked. Based on reviews, the drone's obstacle avoidance is highly advanced and it is even able 
@@ -518,19 +516,19 @@ to follow a downhill biker even in dense forests.
     \label{fig:skydio}
 \end{figure}
 
-The drone is controlled by the user's phone, a Beacon or a traditional radio controller. When using a 
-phone the drone purely relies on the camera feed for tracking. This only works with constant line of
-sight, otherwise the drone might get stuck at some point and requires user intervention. Besides line
-of sight a Beacon can be used that improves the tracking performance.
+The drone is controlled by the user's phone, a Beacon, or a traditional radio controller. When using a 
+phone the drone purely relies on the camera feed for tracking. This only works with a constant line of
+sight, otherwise, the drone might get stuck at some point and requires user intervention. Besides the line
+of sight, a Beacon can be used that improves the tracking performance.
 
 
 \subsection{Velodyne Velabit}
 Velabit is an affordable directional LIDAR sensor developed by Velodyne. The sensor will be available 
 for costumers in mid-2020 and only official specifications are available at the time \cite{VelodyneWebsite}. 
 The sensor has a 60$^{\circ}$ horizontal and 10$^{\circ}$ vertical field of view and it can range up to 100m.
-It is placed inside a housing with size of 6x6x3.5cm. 
-The weight of this sensor is currently unknown, but based on it's size, it is expected to be low enough
-so that it can be equipped even on small sized drones as a precise mapping solution.
+It is placed inside a housing with a size of 6x6x3.5cm. 
+The weight of this sensor is currently unknown, but based on its size, it is expected to be low enough
+so that it can be equipped even on small-sized drones as a precise mapping solution.
 
 \begin{figure}[!h]
     \centering
@@ -542,27 +540,27 @@ so that it can be equipped even on small sized drones as a precise mapping solut
 
 
 \section{Components review} \label{chap:components}
-Before actually building the system and experimenting on an expensive quadcopter in real world environment,
-it is cheaper, safer and easier to do tests in a simulated environment. 
+Before actually building the system and experimenting on an expensive quadcopter in a real-world environment,
+it is cheaper, safer, and easier to do tests in a simulated environment. 
 
 The PX4 Firmware repository\cite{PX4Repository} contains Gazebo simulation files to give developers a head 
-start in simulation of their product. Upon these simulation quadcopter models LIDAR sensors can be placed and 
-moved around with ease, without the need of wiring or external infrastructure. This simulation is 
+start in the simulation of their product. Upon these simulated quadcopter models, LIDAR sensors can be placed and 
+moved around with ease, without the need for wiring or external infrastructure. This simulation is 
 suitable for Software in the loop (SITL) testing, meaning that the same software developed for the simulation
 can be used on a real quadcopter with little or no modifications. As for communication of the software 
-components Robot Operating System will be used.
+components, Robot Operating System will be used.
 
 
 \subsection{Robot Operating System}
 Robot Operating system (ROS) is a set of software libraries and tools that help developers to build robust 
 general-purpose robot applications\cite{ROSWebsite}. ROS provides hardware abstraction of the underlying 
-robot, generalizes the interfacing of these robots and allows simple high-level usage.
+robot, generalizes the interfacing of these robots, and allows simple high-level usage.
 
 
 The core component of ROS is a public-subscribe communication protocol similar to MQTT protocol
-used on the field of IoT. The ROS system is comprised of a number of independent communicating parties called 
+used in the field of IoT. The ROS system is comprised of a number of independent communicating parties called 
 nodes. Each node can subscribe to multiple topics and receive a stream of messages published to these topics 
-by other nodes. For example a temperature filter node might subscribe to a topic of "/temperature\_sensor" 
+by other nodes. For example, a temperature filter node might subscribe to a topic of "/temperature\_sensor" 
 and publish the filtered temperature values to a topic called "/filtered\_temperature\_sensor". 
 The benefit using this solution is that the nodes achieve communication exclusively via this protocol 
 so each node lives independently from another. Nodes in ROS do not need to be on the same system or 
@@ -578,7 +576,7 @@ smartphones making the system flexible.
 
 To start a ROS session, a ROS Master needs to be started first. After starting the master, nodes can be 
 started and each one registers the topics it wants to subscribe/publish to. The master handles these requests
-and helps the nodes to establish connection between each other so communication can be started. 
+and helps the nodes to establish a connection between each other so communication can be started. 
 
 ROS is language independent so nodes can be implemented in different programming languages. While C++ is 
 the most common language for product development, official Python wrappers can be used for fast 
@@ -587,10 +585,10 @@ prototyping.
 
 \subsection{Gazebo Simulator}
 Gazebo\cite{GazeboWebsite} is an open-source 3D simulator for robotics, with the ability to accurately simulate robots in complex
-indoor or outdoor environments. It is similar to game engines, but produces more realistic, physically correct
-behavior. Gazebo is free, open-source, actively developed and has gained high popularity during the last years. 
+indoor or outdoor environments. It is similar to game engines but produces more realistic, physically correct
+behavior. Gazebo is free, open-source, actively developed, and has gained high popularity during the last years. 
 
-Gazebo comes with a growing number of robots and sensors. For simulations one can choose from the officially 
+Gazebo comes with a growing number of robots and sensors. For simulations, one can choose from the officially 
 available robots or create a custom robot using SDF files. Any of these robots can be customized and any 
 number of sensors can be added. Using simulations sensor data can be generated and development can be started 
 without having the actual hardware.
@@ -603,31 +601,31 @@ without having the actual hardware.
 \end{figure}
 
 Why Gazebo is particularly interesting, is because it can be started in a ROS compatible mode. Gazebo
-started with ROS wrapper will actively channel all sensor readings, states and many more to ROS topics, 
+started with ROS wrapper will actively channel all sensor readings, states, and many more to ROS topics, 
 allowing nodes outside of the simulation to subscribe and publish to these topics. Using this technique nodes 
-can be developed in a truly hardware independent manner. The simulation can be replaced by a real robot
+can be developed in a truly hardware-independent manner. The simulation can be replaced by a real robot
 and the nodes developed during this phase can be used without changes on the real hardware. For example a 
 Husky robot can be simulated in Gazebo and controlled through ROS. The Gazebo simulation of a Husky 
-can be seen on figure \ref{fig:ros_husky}.
+can be seen in figure \ref{fig:ros_husky}.
 
 
 \subsection{PX4 Autopilot Software}
-PX4 is a powerful open-source autopilot flight stack. PX4 can control many different vehicle frames and vehicle 
-types, supports wide variety of sensors and peripherals. The project is a part of Dronecode, a nonprofit
+PX4 is a powerful open-source autopilot flight stack. PX4 can control many different vehicle frames and 
+types, and supports a wide variety of sensors and peripherals. The project is a part of Dronecode, a nonprofit
 foundation working on open-source projects to achieve standardization of drones.\cite{PX4Website} 
 
 The core component of PX4 is the flight stack or flight controller that controls the motors based on sensor
-measurements and executes commands received from ground control. Besides the flight stack the repository 
+measurements and executes commands received from ground control. Besides the flight stack, the repository 
 also contains Gazebo simulation files of multiple vehicles and an extensive \verb|Makefile| that makes 
 starting all components of the simulations relatively easy. 
 
 \subsubsection{PX4 simulation using MAVROS}
-The logical units of the simulation can be seen on figure \ref{fig:px4_sitl_simulation}.
-By executing a \verb|make| command the Gazebo Simulator, the PX4 SITL flight stack and the API/Offboard units
+The logical units of the simulation can be seen in figure \ref{fig:px4_sitl_simulation}.
+By executing a \verb|make| command the Gazebo Simulator, the PX4 SITL flight stack, and the API/Offboard units
 are started at once. The PX4 SITL flight stack connects on a TCP port to the simulator, receives sensor data, 
 calculates and sends motor and actuator values to the simulated vehicle. There are two options for the navigation
 of the simulated drone: using an Offboard API or a Ground Control Station. For autonomous flight control an 
-Offboard API needs to be used and MAVROS is a suitable choice, it basically offers a ROS interface for 
+Offboard API needs to be used and MAVROS is a suitable choice, it offers a ROS interface for 
 the drone. It forwards all messages from the flight stack to ROS topics and vice versa.
 
 \begin{figure}[h]
@@ -647,10 +645,10 @@ to always use sensors that are supported by the flight controller, not to mentio
 is designed for small messages so the bandwidth can be low in some cases. Luckily Gazebo can 
 be started with a ROS wrapper and therefore all sensors can be accessed on ROS topics. However this technique
 cannot be used on a real drone with the original PX4 firmware, because it purely relies on MAVLink messages, 
-but for simulation purposes it's an elegant solution. This modified overview of the units used for simulation
-and a screenshot of an Iris drone simulated in Gazebo can be seen on figure \ref{fig:px4_sitl_ros_wrapper} and 
+but for simulation purposes, it's an elegant solution. This modified overview of the units used for simulation
+and a screenshot of an Iris drone simulated in Gazebo can be seen in figure \ref{fig:px4_sitl_ros_wrapper} and 
 \ref{fig:px4_sitl_iris}. 
-MAVROS is still needed to be run, because there are some messages that would not be published to ROS otherwise.
+MAVROS is still needed to be run because some messages would not be published to ROS otherwise.
 
 \begin{figure}[h]
     \centering
@@ -662,23 +660,23 @@ MAVROS is still needed to be run, because there are some messages that would not
 \begin{figure}[h]
     \centering
     \includegraphics[width=140mm]{figures/iris_gazebo.png}
-    \caption{Iris drone in gazebo}
+    \caption{Iris drone in Gazebo}
     \label{fig:px4_sitl_iris}
 \end{figure}
 
 \subsection{QGroundControl}
 QGroundControl(QGC) is an open-source ground control station software, developed as a part of Dronecode. It provides
 full flight control and vehicle setup for PX4 and ArduPilot powered vehicles and for any flight controller that
-uses MAVLink communication protocol. It provides easy and straightforward usage for beginners, while delivering
-high end features for experienced users too.
+uses MAVLink communication protocol. It provides easy and straightforward usage for beginners while delivering
+high-end features for experienced users too.
 
 QGC is mainly used for flight controller setup and configuration. When setting up a PX4 autopilot based flight 
 controller, the controller needs to know the type of the vehicle and the frame that is used. Besides selecting 
-vehicle type, internal sensors need to be calibrated and telemetry messages need to be configured. Low level 
-parameters can also be adjusted and obstacle avoidance can also be setup here, as seen in the product of Terabee
-in \ref{sect:TerabeeDescription}, but even low level flight controller parameters can be changed.
+vehicle type, internal sensors need to be calibrated and telemetry messages need to be configured. Low-level 
+parameters can also be adjusted and obstacle avoidance can also be set up here, as seen in the product of Terabee
+in \ref{sect:TerabeeDescription}, but even low-level flight controller parameters can be changed.
 
-QGC can also be used for mission planning for autonomous flight and gives instant feedback of the progress of a 
+QGC can also be used for mission planning for autonomous flight and gives instant feedback on the progress of a 
 mission by visualizing the drone on a map and the most important sensor data.
 
 \begin{figure}[h]
@@ -691,6 +689,18 @@ mission by visualizing the drone on a map and the most important sensor data.
 
 \section{VL53L1X LIDAR sensor} \label{sect:vl53l1x_intro}
 
+VL53L1X is described as a long-distance ranging Time-of-Flight sensor by STMicroelectronics \cite{VL53L1XDatasheet}. 
+The size of the module is 4.9x2.5x1.56mm, it emits 940nm invisible laser and uses a SPAD(single-photon 
+avalanche diode) receiving array with a field of view of 27$^{\circ}$. The module runs all the digital signal
+processing on a built-in low power microcontroller that frees up the host processor from these tasks.
+The sensor according to the datasheet is capable of 50Hz ranging frequency and up to 400cm distance 
+measurements. The size of the laser receiving array can be programmatically changed by setting the
+region-of-interest(ROI) size. This way the sensor provides multizone operation and a higher resolution, than
+by using the whole SPAD array.
+
+I chose to use this sensor, because of its small size, availability in the university laboratory, low hardware 
+infrastructure needs and previous experience. 
+
 \begin{figure}[ht]
     \centering
     $\vcenter{\hbox{\includegraphics[width=50mm, keepaspectratio]{figures/vl53l1x.png}}}$
@@ -698,16 +708,3 @@ mission by visualizing the drone on a map and the most important sensor data.
     \caption{VL53L1X sensor \cite{VL53L1XDatasheet} and Region of Interest \cite{VL53L1XApplicationNote}}
     \label{fig:VL53L1X_sensor}
 \end{figure}
-
-VL53L1X is described as a long distance ranging Time-of-Flight sensor by STMicroelectronics \cite{VL53L1XDatasheet}. 
-The size of the module is 4.9x2.5x1.56mm, it emits 940nm invisible laser and uses a SPAD(single photon 
-avalanche diode) receiving array with a field of view of 27$^{\circ}$. The module runs all digital signal
-processing on a built in low power microcontroller that frees up the host processor from these tasks.
-The sensor according to the datasheet is capable of 50Hz ranging frequency and up to 400cm distance 
-measurements. The size of the laser receiving array can be programmatically changed by setting 
-region-of-interest(ROI) size. This way the sensor provides multizone operation and a higher resolution, than
-by using the whole SPAD array.
-
-I chose to use this sensor, because of its small size, availability in the university laboratory, low hardware 
-infrastructure needs and previous experience. 
-
