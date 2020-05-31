@@ -487,7 +487,7 @@ An introduction video can be found on the product website \cite{BitcrazeMultiran
 a SLAM algorithm is used to create a map and localize the drone. This serves as a proof of concept,
 that stationary VL53L1X sensors can be used for mapping and positioning in two dimensions. The company provided 
 no information of the SLAM algorithm used or from the quality of the map.
-\newpage
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=60mm, keepaspectratio]{figures/multiranger_deck.jpg}
@@ -659,7 +659,7 @@ MAVROS is still needed to be run because some messages would not be published to
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=140mm]{figures/iris_gazebo.png}
+    \includegraphics[width=120mm]{figures/iris_gazebo.png}
     \caption{Iris drone in Gazebo}
     \label{fig:px4_sitl_iris}
 \end{figure}
@@ -679,14 +679,14 @@ in \ref{sect:TerabeeDescription}, but even low-level flight controller parameter
 QGC can also be used for mission planning for autonomous flight and gives instant feedback on the progress of a 
 mission by visualizing the drone on a map and the most important sensor data.
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \includegraphics[width=130mm, keepaspectratio]{figures/qgc_start_screen.jpg}
     \caption{QGroundControl main screen\cite{QGCWebpage}}
     \label{fig:qgc_main_screen}
 \end{figure}
 
-
+\newpage
 \section{VL53L1X LIDAR sensor} \label{sect:vl53l1x_intro}
 
 VL53L1X is described as a long-distance ranging Time-of-Flight sensor by STMicroelectronics \cite{VL53L1XDatasheet}. 
@@ -701,7 +701,7 @@ by using the whole SPAD array.
 I chose to use this sensor, because of its small size, availability in the university laboratory, low hardware 
 infrastructure needs and previous experience. 
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
     \centering
     $\vcenter{\hbox{\includegraphics[width=50mm, keepaspectratio]{figures/vl53l1x.png}}}$
     $\vcenter{\hbox{\includegraphics[width=95mm, keepaspectratio]{figures/vl53l1x_roi.png}}}$
