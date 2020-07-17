@@ -510,8 +510,8 @@ resolutions.
 Mapping accuracy and map building reliability are decent for both cases, but 3x3 produced slightly lower RMS error.
 This might be because of more efficient tuning. 
 
-2x2 and 1x1 resolutions have significantly less points per scan, that makes tuning of Cartographer significantly 
-harder. 1x1 proved to be unreliable and the algorithm was unable to match scans to build submaps. 
+2x2 and 1x1 resolutions have significantly fewer points per scan that makes tuning of Cartographer significantly 
+harder. 1x1 proved to be unreliable, and the algorithm was unable to match scans to build submaps. 
 The map built using 2x2 resolution resulted in curved corners and blurry edges. Lowered grid resolution 
 resulted in higher accuracy and stability.
 
@@ -545,8 +545,8 @@ sum [cm]& 13.26 & 8.34 & 16.25& -\\
 % \subsubsection{4x4-resolution}
 
 % In this scenario, the filter selected 4 times 52 points around the quadcopter in 4 rows. This scenario has 
-% the least amount of artifacts, compared to lower resolution. The estimated trajectory followed accurately the 
-% ground-truth trajectory. There were no constant offsets on either axes. The RMS error was 8.12cm on the x- and 
+% the least amount of artifacts compared to the lower resolution. The estimated trajectory followed accurately the 
+% ground-truth trajectory. There were no constant offsets on either ax. The RMS error was 8.12cm on the x- and 
 % 10.48cm on the y-axis, resulting in a cumulated error of 13.26cm. 
 
 % \subsubsection{3x3-resolution}
@@ -573,7 +573,7 @@ sum [cm]& 13.26 & 8.34 & 16.25& -\\
 % comparison has a cumulated RMS error of 22.13cm. 7.95cm error on the x- and 14.17cm on the y-axis. The 
 % 1x1-resolution scenario did not produce any usable map or localization. 
 
-% These scenarios were unusable for the SLAM, so they were  not tested further.  
+% These scenarios were unusable for the SLAM, so they were not tested further.  
 
 
 
@@ -582,36 +582,36 @@ sum [cm]& 13.26 & 8.34 & 16.25& -\\
 
 For the 4x4-resolution 400ms sampling time was chosen, based on the real sensor measurements. The dropped 
 sampling rate 
-from 30Hz to 2.5Hz was significant and made the tuning much harder. Two different grid resolution were tested 
-as well. The quality of the map was decent in both cases, no major flaws were visible. The global SLAM had to 
+from 30Hz to 2.5Hz was significant and made the tuning much harder. Two different grid resolutions were tested 
+as well. The quality of the map was decent in both cases, and no major flaws were visible. The global SLAM had to 
 compensate rotation drifts, that occurred when the drone quickly turned around in the big room, where some 
-ranges became saturated. Low grid resolution produced a smoother path, while on high-resolution grid there 
+ranges became saturated. Low grid resolution produced a smoother path, while on the high-resolution grid, there 
 were jumps and sharper turns. 
 
-The cumulated RMS error on a high grid resolution was 16.49cm, on low grid resolution it was higher: 18.95cm. 
+The cumulated RMS error on a high grid resolution was 16.49cm. On low grid resolution, it was higher: 18.95cm. 
 Higher grid-resolution results in greater accuracy in position estimates, but its stability is lower in comparison
-to lower resolution. 
+to a lower resolution. 
 
 As for the 3x3-resolution, the same sensor settings were chosen, but this setup has a better sampling time of 
 220ms compared to the previous 400ms. This results in an 80\% increase in update rate to 4.5Hz, which also 
 means almost twice more often pose updates. Lowering the grid resolution was necessary here as well. The map 
-quality was adequate and global SLAM almost hasn't done any corrections. The cumulated RMS error was 10.4cm, 
+quality was adequate, and global SLAM almost has not done any corrections. The cumulated RMS error was 10.4cm, 
 6.4cm on the x-axis, and 8.2 on the y-axis. Because of stability and accuracy, 3x3-resolution seems like a 
 better resolution for Cartographer SLAM. 
 
 \subsection{Effects of maximum distance}
 
 The VL53L1X sensor measurements showed that each setup works accurately until 2.5m and each has about 25cm 
-drift at a distance of 3m, so 2.75m as maximum distance was chosen for the tests. The lowered maximum 
-distance had a positive effect, that the number of transition points has been reduced, because on the shorter 
-distance the field of view could not open as wide as it could before. The downside of the limited range is 
-that the algorithm loses track in the open spaces. This caused more flaws and a small tilt can be observed
+drift at a distance of 3m, so 2.75m as the maximum distance was chosen for the tests. The lowered maximum 
+distance had a positive effect that the number of transition points has been reduced because on the shorter 
+distance, the field of view could not open as wide as it could before. The downside of the limited range is 
+that the algorithm loses track in the open spaces. This caused more flaws, and a small tilt can be observed
 in the map.  
 The trajectory using sensors with 3x3-resolution has a significant offset on the y-axis, which was picked up 
 due to the reduced reference points. Similar scans were pulled together, resulting for example in a shortened
 corridor. 
-The trajectory using 4x4-resolution sensors has a smaller offset, it seems like with more 
-points per scan the SLAM algorithm was able to pick up small details and better track the movement of the 
+The trajectory using 4x4-resolution sensors has a smaller offset. It seems like with more 
+points per scan, the SLAM algorithm was able to pick up small details and better track the movement of the 
 drone even on a mostly even corridor. On the other hand, it failed in a big room with significantly greater 
 distances than 2.75m.
 
