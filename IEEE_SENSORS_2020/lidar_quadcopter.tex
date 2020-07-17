@@ -289,12 +289,12 @@ The abstract goes here.
 % no \IEEEPARstart
 A prerequisite for future expansion of mobile robots is the ability to navigate autonomously and safely in 
 their ever-changing environment without collisions. Simultaneous Localization And Mapping (SLAM) algorithms
-discover the surroundings, create a map and localize the robot in the map with the help of ranging or visual 
+discover the surroundings, create a map, and localize the robot in the map with the help of ranging or visual 
 sensors. In an indoor scenario, this sensor is often the Light Detection and Ranging (LIDAR) sensor. 
 
-Many papers can be found about SLAM and LIDAR sensors that are capable of building highly accurate maps of building-interiors or even outdoors. (references!) However, they are using precise, long range rotating planner scanners,
+Many papers can be found about SLAM and LIDAR sensors capable of building highly accurate maps of building-interiors or even outdoors. (references!) However, they are using precise, long range rotating planner scanners,
 which can be carried by large an industrial-grade hexacopter or octocopter only, and due to their weight, they are
-not suitable for smaller quadcopters. Another frequent choice for drones are multiple cameras and image processing.
+not suitable for smaller quadcopters. Another frequent choice for drones is multiple cameras and image processing.
 The issue here is the rather intense computation demand, which is hard to satisfy on a small quadcopter with 
 limited power supply. 
 
@@ -302,9 +302,9 @@ In this paper, the evaluation of a SLAM system is introduced that uses stationar
 the drone's environment and uses Cartographer SLAM to construct maps. This solution might provide lightweight,
 cheap, and computationally light alternative to currently used planar scanners. 
 
-Each setup is evaluated based on data collected from Gazebo simulator and LIDAR sensors are simulated with 
-parameters determined by measurements with VL53L1X sensors. On the collected data multiple sensors layouts and 
-settings were evaluated to find the optimal number of sensors and achieve balance between accuracy and simplicity.
+Each setup is evaluated based on data collected from Gazebo simulator, and LIDAR sensors are simulated with 
+parameters determined by measurements with VL53L1X sensors. On the collected data, multiple sensors layouts and 
+settings were evaluated to find the optimal number of sensors and achieve a balance between accuracy and simplicity.
 
 
 % An example of a floating figure using the graphicx package.
@@ -406,8 +406,8 @@ settings were evaluated to find the optimal number of sensors and achieve balanc
 
 \section{Ranging sensor-based SLAM}
 Cameras are cheap, popular but they demand high processing capabilities. In contrast, ranging sensor-based 
-approaches produce a lower amount of data and thus they are less resource-intensive. Ultrasonic sensors have been used for distance measurements for many years, but they suffer from significant 
-measurement noise. LIDAR sensors on the other hand uses light to measure distance, offer more accurate 
+approaches produce a lower amount of data and thus, they are less resource-intensive. Ultrasonic sensors have been used for distance measurements for many years, but they suffer from significant 
+measurement noise. LIDAR sensors, on the other hand use light to measure distance, offer more accurate 
 measurements, typically lower form factor, higher resolution, and update rates. Planar scanners for 2D or 3D 
 scanning typically use a rotating LIDAR sensor that makes evenly distributed measurements.
 
@@ -415,8 +415,8 @@ Stationary LIDAR sensor-based modules can be found for collision avoidance. Tera
 system with 8 selectable LIDAR sensors. The company offers long-range and fast-ranging versions, that can range
 up to 60m or 600Hz.
 
-Bitcraze has developed a Multi-ranger deck for their mini drone that weights only 27g. This deck carries 5 VL53L1X
-lidar sensors, 4 horizontally and 1 vertically. The company website has a SLAM demo, but provided no information
+Bitcraze has developed a Multi-ranger deck for their mini drone that weighs only 27g. This deck carries 5 VL53L1X
+lidar sensors, 4 horizontally, and 1 vertically. The company website has a SLAM demo but provided no information
 of the SLAM algorithm in use. 
 
 \section{The VL53L1X LIDAR sensor}
@@ -430,11 +430,11 @@ receiving array can be programmatically changed by setting the region-of-interes
 
 
 
-The most relevant settings of the sensor are the timing budget, distance preset and the resolution.
+The most relevant settings of the sensor are the timing budget, distance preset, and the resolution.
 The timing budget sets the maximum time available for the sensor to complete ranging. It can be adjusted 
 between 18.5ms to 1s. Distance preset sets 
-the expected range distance and by moving the ROI across the whole field-of-view, higher scan resolution 
-can be achieved. Using this method the resolution can be extended to 4x4, without overlapping segments.
+the expected range distance, and by moving the ROI across the whole field-of-view, higher scan resolution 
+can be achieved. Using this method, the resolution can be extended to 4x4 without overlapping segments.
 
 To simulate the VL53L1X sensor accurately, a series of measurements were conducted on distances from 0.5m to 4m
 in 0.5m steps with selected sensor settings. On each distance, the average measured distance, standard deviation,
@@ -443,17 +443,17 @@ sensor resolutions 1x1, 2x2, 3x3, 4x4, and all distance presets: short, medium, 
 the sensor with all possible timing budget values, so 4 values have been selected.
 18.5 ms provides the highest sampling rate of 50Hz, but can only be used with short-distance preset. 33ms is the 
 lowest timing that can be used with long-distance preset. Based on the datasheet, 140ms is the lowest budget that
-can provide ranges up to 400cm and lastly, 200ms is expected to provide less noisy measurements.
+can provide ranges up to 400cm, and lastly, 200ms is expected to provide less noisy measurements.
 The last three values are also used in the VL53L1X datasheet\cite{VL53L1XDatasheet} to demonstrate ranging 
 accuracy. 
 
 TODO plot
 
 Based on the completed measurements, it can be seen that sampling time is independent of the distance preset 
-and is directly proportional to the resolution and the timing budget. On each tested 
-scenarios, the most accurate measurements were always with resolution 1x1. By increasing the resolution, therefore
+and is directly proportional to the resolution and the timing budget. In each tested 
+scenario, the most accurate measurements were always with resolution 1x1. By increasing the resolution, therefore
 lowering the receiver SPAD array size, the measured distance starts to deviate from the real distance, and 
-standard deviation increases. This can be seen at 2.5m distance with medium preset. Long-distance preset 
+standard deviation increases. This can be seen at 2.5m distance with medium preset. Long-distance preset, 
 however produces more accurate measurements even on 3m, so it is preferred over medium preset. Measurements 
 with long-distance preset and 140ms timing budget follow the real distances even on 3 meters but start to 
 deviate at 3.5 meters with 2x2-resolution and above. Raising the timing budget to 200ms reduces the error 
