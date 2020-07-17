@@ -407,7 +407,7 @@ settings were evaluated to find the optimal number of sensors and achieve a bala
 \section{Ranging sensor-based SLAM}
 Cameras are cheap, popular but they demand high processing capabilities. In contrast, ranging sensor-based 
 approaches produce a lower amount of data and thus, they are less resource-intensive. Ultrasonic sensors have been used for distance measurements for many years, but they suffer from significant 
-measurement noise. LIDAR sensors, on the other hand use light to measure distance, offer more accurate 
+measurement noise. LIDAR sensors, on the other hand, use light to measure distance, offer more accurate 
 measurements, typically lower form factor, higher resolution, and update rates. Planar scanners for 2D or 3D 
 scanning typically use a rotating LIDAR sensor that makes evenly distributed measurements.
 
@@ -463,7 +463,7 @@ and standard deviation, but the error is still significant.
 to the datasheet. The short preset also has the best ambient light immunity, a favorable quality. Surprisingly,
 in the tests, the sensor with these settings was able to measure up to 2m with only 7mm standard deviation only. 
 Above 2m no ranges were successful. Compared to other presets, the sampling time for each resolution decreased
-significantly. In the case of 4x4-resolution, the sampling time has decreased from 390ms to 265ms and the 
+significantly. In the case of 4x4-resolution, the sampling time has decreased from 390ms to 265ms, and the 
 maximum distance decreased from 2.5m to about 1m. The increase in the update rate might be beneficial for 
 the SLAM algorithm. 
 
@@ -474,16 +474,16 @@ is used. The collected data contains LIDAR measurements of the surroundings of t
 simulated LIDAR scanners are placed on the top and bottom of the quadcopter to evenly scan the top- and bottom 
 hemispheres. The drone was flown around inside a simulated building, that was designed to have rooms that only 
 have distances under the maximum distance of the ranging sensor and bigger rooms so that ranges some scans 
-can be saturated. The building contains no furniture, but has doors and windows. All messages published to ROS
+can be saturated. The building contains no furniture but has doors and windows. All messages published to ROS
 topics are recorded into a Rosbag, LIDAR measurements at 30Hz, while IMU is published at 50Hz.
 
-The recorded data is filtered to simulate the VL53L1X sensors in a certain layout, all with the same settings. 
+The recorded data is filtered to simulate the VL53L1X sensors in a specific layout, all with the same settings. 
 Sensor parameters are determined using the measurements with the actual sensor. These simulation parameters are
 the sampling rate and maximum distance. 
 
 The filtered data is played back for Cartographer SLAM, that is tuned to have the best possible performance
-with the current setup. Tuning requires a good understanding of the parameters and the procedure is unique for
-each setup. At first the algorithm is tuned to build stable and consistent submaps, then for global SLAM and
+with the current setup. Tuning requires a good understanding of the parameters, and the procedure is unique for
+each setup. At first, the algorithm is tuned to build stable and consistent submaps, then for global SLAM and
 loop closures.
 
 To have an absolute measure besides visual inspection, the RMS error is calculated of the SLAM trajectory of 
@@ -492,8 +492,8 @@ each setup. The ground-truth trajectory is extracted from the original Rosbag, t
  
 The LIDAR parameters are introduced incrementally, starting from unfiltered range data, that is expected to 
 result in the best possible map and trajectory using this dataset. Sensor resolution, sampling rate and 
-maximum distance limit is introduced after each other to see their effects individually. 13 sensors are used
-in even layout on the horizontal plane for the evaluation process. At last, the number of sensors is reduced
+maximum distance limit are introduced after each other to see their effects individually. 13 sensors are used
+in even layout on the horizontal plane for the evaluation process. Finally, the number of sensors is reduced
 until the SLAM algorithm is still capable of consistent and reliable mapping.
 
 \subsection{Effects of LIDAR resolution}
@@ -506,8 +506,8 @@ point. These points appear when the ROI is partly covered by a close object and 
 the reported distance is in between the two obstacles. For example, this causes corners to be curved on lower 
 resolutions.
 
-4x4 and 3x3 resolutions provide high number of points per scan, which makes scan matching more effective. 
-Mapping accuracy and map building reliability is decent for both cases, but 3x3 produced slightly lower RMS error.
+4x4 and 3x3 resolutions provide a high number of points per scan, which makes scan matching more effective. 
+Mapping accuracy and map building reliability are decent for both cases, but 3x3 produced slightly lower RMS error.
 This might be because of more efficient tuning. 
 
 2x2 and 1x1 resolutions have significantly less points per scan, that makes tuning of Cartographer significantly 
