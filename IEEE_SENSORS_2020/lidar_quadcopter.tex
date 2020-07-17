@@ -470,12 +470,11 @@ the SLAM algorithm.
 \section{2D SLAM evaluation}
 
 To be able to compare the performance of the SLAM algorithm with each sensor setup, the same dataset 
-is used. The collected data contains LIDAR measurements of the surroundings of the vehicle in 3D. In Gazebo, 
-simulated LIDAR scanners are placed on the top and bottom of the quadcopter to evenly scan the top- and bottom 
+is used. The collected data contains LIDAR measurements of the surroundings of the vehicle in 3D. In the Gazebo simulator, 
+LIDAR scanners are placed on the top and bottom of the quadcopter to evenly scan the top- and bottom 
 hemispheres. The drone was flown around inside a simulated building, that was designed to have rooms that only 
 have distances under the maximum distance of the ranging sensor and bigger rooms so that ranges some scans 
-can be saturated. The building contains no furniture but has doors and windows. All messages published to ROS
-topics are recorded into a Rosbag, LIDAR measurements at 30Hz, while IMU is published at 50Hz.
+can be saturated. The building contains no furniture but has doors and windows. All sensor and control messages are recorded. The LIDAR measurements update at 30Hz, while IMU is published at 50Hz.
 
 The recorded data is filtered to simulate the VL53L1X sensors in a specific layout, all with the same settings. 
 Sensor parameters are determined using the measurements with the actual sensor. These simulation parameters are
@@ -487,8 +486,7 @@ each setup. At first, the algorithm is tuned to build stable and consistent subm
 loop closures.
 
 To have an absolute measure besides visual inspection, the RMS error is calculated of the SLAM trajectory of 
-each setup. The ground-truth trajectory is extracted from the original Rosbag, that is provided by Gazebo.
-
+each setup. The ground-truth trajectory is provided by Gazebo.
  
 The LIDAR parameters are introduced incrementally, starting from unfiltered range data, that is expected to 
 result in the best possible map and trajectory using this dataset. Sensor resolution, sampling rate and 
