@@ -447,6 +447,8 @@ can provide ranges up to 400cm and lastly, 200ms is expected to provide less noi
 The last three values are also used in the VL53L1X datasheet\cite{VL53L1XDatasheet} to demonstrate ranging 
 accuracy. 
 
+TODO plot
+
 Based on the completed measurements, it can be seen that sampling time is independent of the distance preset 
 and is directly proportional to the resolution and the timing budget. On each tested 
 scenarios, the most accurate measurements were always with resolution 1x1. By increasing the resolution, therefore
@@ -459,95 +461,132 @@ and standard deviation, but the error is still significant.
 
 18.5ms timing budget with short distance preset can produce the fastest ranging measurements up to 1.6m according
 to the datasheet. The short preset also has the best ambient light immunity, a favorable quality. Surprisingly,
-in the tests, the sensor with these settings was able to measure up to 2m with 7mm standard deviation only. 
+in the tests, the sensor with these settings was able to measure up to 2m with only 7mm standard deviation only. 
 Above 2m no ranges were successful. Compared to other presets, the sampling time for each resolution decreased
 significantly. In the case of 4x4-resolution, the sampling time has decreased from 390ms to 265ms and the 
 maximum distance decreased from 2.5m to about 1m. The increase in the update rate might be beneficial for 
 the SLAM algorithm. 
 
-TODO
-
 \section{2D SLAM evaluation}
 
-The fair way to compare the performance of the SLAM algortihm with different LIDAR layouts is to use the 
-same dataset for every setup. For this reason, there were simulated LIDAR scanners on the top and bottom 
-of the drone that evenly scanned the top and bottom hemispheres. The complete scan cover the whole sphere 
-around the drone with ranges evenly distributed along all axes, capable of even 3D SLAM evaluation. The
-drone was flown around inside a simulated building with corridors, doors, windows, small and big rooms,
-while all sensor data was recorded. Later, the recorded data was filtered according to the given sensor 
-configuration and  played back to the SLAM algorithm for map creation and pose-estimation to the evaluation.
-Cartographer also used the IMU data as an initial guess for the pose and the accelerometer to determine the
-direction of gravity. In the  evaluation the RMS error was calculated between the trajectory calculated by 
-the SLAM and the ground-truth trajectory, which was provided by the simulator. The total length of the 
-recorded flight was 144 seconds. The LIDAR distance measurements were published  on 30Hz each and IMU data 
-was published on 50Hz. 
+To be able to compare the performance of the SLAM algorithm with each sensor setup, the same dataset 
+is used. The collected data contains LIDAR measurements of the surroundings of the vehicle in 3D. In Gazebo, 
+simulated LIDAR scanners are placed on the top and bottom of the quadcopter to evenly scan the top- and bottom 
+hemispheres. The drone was flown around inside a simulated building, that was designed to have rooms that only 
+have distances under the maximum distance of the ranging sensor and bigger rooms so that ranges some scans 
+can be saturated. The building contains no furniture, but has doors and windows. All messages published to ROS
+topics are recorded into a Rosbag, LIDAR measurements at 30Hz, while IMU is published at 50Hz.
 
-The LIDAR parameters were changed incrementally one by one. In the first simulation unfiltered range data 
-was used, which had the maximum possible sampling rate, 4m maximum distance, and 128x128-resolution in a 
-total of the top and bottom hemispheres. This produced the most accurate map and localization estimates, 
-compared to the other down-sampled dataset. Second, the effect of the LIDAR resolution was tested. The initial
-measurements were filtered as if 13 LIDAR sensors would have been placed evenly on the horizontal axis, 
-covering the full 360 degree. The resolution of the sensors were set to 4x4, 3x3, 2x2 and 1x1. To simulate 
-the behavior of VL53L1X, ranges inside the sensor's field of view were averaged. This filtering caused 
-artifacts like curved corners and transition points that occured when an object was only partly in the field 
-of view and another distant object covered the rest of the ranging. These smooth transitions hide the sharp 
-edges of walls, making it harder to insert points and to find loop-closures. Third, the resolution with the 
-best performance from the second step was used with various sampling rates of the actual sensor. Forth, the 
-maximum distance was lowered to realistic, while keeping the same layout of the sensors. Finally, the number 
-of sensors was reduced until the lowest number, where the setup was still capable of producing a decent 
-quality map. 
+The recorded data is filtered to simulate the VL53L1X sensors in a certain layout, all with the same settings. 
+Sensor parameters are determined using the measurements with the actual sensor. These simulation parameters are
+the sampling rate and maximum distance. 
+
+The filtered data is played back for Cartographer SLAM, that is tuned to have the best possible performance
+with the current setup. Tuning requires a good understanding of the parameters and the procedure is unique for
+each setup. At first the algorithm is tuned to build stable and consistent submaps, then for global SLAM and
+loop closures.
+
+To have an absolute measure besides visual inspection, the RMS error is calculated of the SLAM trajectory of 
+each setup. The ground-truth trajectory is extracted from the original Rosbag, that is provided by Gazebo.
+
+ 
+The LIDAR parameters are introduced incrementally, starting from unfiltered range data, that is expected to 
+result in the best possible map and trajectory using this dataset. Sensor resolution, sampling rate and 
+maximum distance limit is introduced after each other to see their effects individually. 13 sensors are used
+in even layout on the horizontal plane for the evaluation process. At last, the number of sensors is reduced
+until the SLAM algorithm is still capable of consistent and reliable mapping.
 
 \subsection{Effects of LIDAR resolution}
 
-First, unfiltered data ranges with maximum rate and distance were used. Because there was no noise at all, 
-even without a global SLAM, a decent quality map could be built. The extracted trajectory closely followed 
-the ground truth trajectory. The RMS error on the x- was 6.3cm and a bit less 6.5cm on the y-axis, resulting 
-in a cumulated 12.8cm <<<????>>>> RMS error. 
+First, unfiltered data ranges with maximum rate and distance were used, without additional noise.
+Even without global SLAM, a decent quality map could be built. The extracted trajectory closely followed 
+the ground-truth trajectory. The RMS error on the x- was 6.3cm and a bit less 6.5cm on the y-axis, resulting 
+in a cumulated 9.05cm RMS error. The lowered resolution introduces an artifact, that is referred to as transition
+point. These points appear when the ROI is partly covered by a close object and the rest is by a far object, so 
+the reported distance is in between the two obstacles. For example, this causes corners to be curved on lower 
+resolutions.
 
-\subsubsection{4x4-resolution}
+4x4 and 3x3 resolutions provide high number of points per scan, which makes scan matching more effective. 
+Mapping accuracy and map building reliability is decent for both cases, but 3x3 produced slightly lower RMS error.
+This might be because of more efficient tuning. 
 
-In this scenario the filter selected 4 times 52 points around the quadcopter in 4 rows. This scenario had 
-many artifacts and transition points, still, the estimated trajectory followed accurately the ground-truth 
-trajectory. There were no constant offsets on neither axes. The RMS error of this setup was only 6cm more 
-than the error of unfiltered data. The RMS error was 8.12cm on the x- and 10.48cm on the y-axis, resulting 
-in a cumulated error of 18.6cm. 
+2x2 and 1x1 resolutions have significantly less points per scan, that makes tuning of Cartographer significantly 
+harder. 1x1 proved to be unreliable and the algorithm was unable to match scans to build submaps. 
+The map built using 2x2 resolution resulted in curved corners and blurry edges. Lowered grid resolution 
+resulted in higher accuracy and stability.
 
-\subsubsection{3x3-resolution}
+\begin{table}[!t]
+% increase table row spacing, adjust to taste
+\renewcommand{\arraystretch}{1.3}
+% if using array.sty, it might be a good idea to tweak the value of
+% \extrarowheight as needed to properly center the text within the cells
+\caption{RMS error of different resolutions}
+\label{table_resolution}
+\centering
+% Some packages, such as MDW tools, offer better commands for making tables
+% than the plain LaTeX2e tabular which is used here.
+\begin{tabular}{|c||c|c|c|c|}
+\hline
+  & 4x4 & 3x3 & 2x2 & 1x1\\
+\hline
+\hline
+x [cm] & 8.12 & 4.04 & 7.95 & -\\
+\hline
+y [cm]& 10.48 & 7.3& 14.17& -\\
+\hline
+sum [cm]& 13.26 & 8.34 & 16.25& -\\
+\hline
+\end{tabular}
+\end{table}
 
-As the resolution is lowered to 3x3, the field of view of each region of interest had broadened. This caused 
-the artifacts coming from averaging to be more significant. The number of ranges per scan was also lowered, 
-so the ratio of transition points and wall hits increased heavily impacting the performance of the SLAM. 
-Tuning on the SLAM algorithm helped to produce a decent quality map. The global SLAM was able to compensate 
-drifting submaps. Although the mapping accuracy was reduced along the reduced sensor resolution, the 
-localization accuracy had increased. The cumulated RMS error for this setup was 11.34cm. The RMS error on 
-the x- was 4.04cm and on the y-axis it was 7.3cm. The accuracy of this setup is the result of the  better 
-SLAM parameter tuning. 
 
-\subsubsection{2x2 and 1x1 resolutions}
 
-Compared to the 3x3-resolution, these scenario contains relevantly fewer points, which makes scan matching 
-significantly less efficient. Tuning of this setup was noticeably harder and the quality of the produced map 
-was highly decreased. The grid resolution of the map should be reduced to low resolution. While the configuration
- with a high-resolution grid map was able to follow the ground-truth trajectory in small rooms and the narrow 
- corridor, it lost track in the big and spacious room, when the ranges were far apart. 
 
-In the case of the 2x2-resolution, the high-resolution trajectory was at some points as far as 1.4m from the
-ground-truth pose, but the cumulated RMS error was only 43.4cm. This shows that a seemingly small difference in 
-RMS error can mean an error of more than a meter at a part of the trajectory. The low-resolution trajectory in
-comparison has a cumulated RMS error of 22.13cm. 7.95cm error on the x- and 14.17cm on the y-axis. The 
-1x1-resolution scenario did not produce any usable map or localization. 
+% \subsubsection{4x4-resolution}
 
-These scenarios were unusable for the SLAM, so they were  not tested further.  
+% In this scenario, the filter selected 4 times 52 points around the quadcopter in 4 rows. This scenario has 
+% the least amount of artifacts, compared to lower resolution. The estimated trajectory followed accurately the 
+% ground-truth trajectory. There were no constant offsets on either axes. The RMS error was 8.12cm on the x- and 
+% 10.48cm on the y-axis, resulting in a cumulated error of 13.26cm. 
+
+% \subsubsection{3x3-resolution}
+
+% As the resolution is lowered to 3x3, the field of view of each region of interest had broadened. This caused 
+% the transition points to be more significant, that has an impact on the performance of the system. 
+% Tuning on the SLAM algorithm helped to produce a decent quality map and the global SLAM was able to compensate 
+% drifting submaps. Although the mapping quality was reduced due to the the reduced sensor resolution, the 
+% localization accuracy had increased. The cumulated RMS error for this setup was 8.34cm. The RMS error on 
+% the x- was 4.04cm and on the y-axis it was 7.3cm. The accuracy of this setup is the result of the better 
+% SLAM parameter tuning. 
+
+% \subsubsection{2x2 and 1x1 resolutions}
+
+% Compared to the 3x3-resolution, these scenario contains relevantly fewer points, which makes scan matching 
+% significantly less efficient. Tuning of this setup was noticeably harder and the quality of the produced map 
+% was highly decreased. The grid resolution of the map should be reduced to low resolution. While the configuration
+%  with a high-resolution grid map was able to follow the ground-truth trajectory in small rooms and the narrow 
+%  corridor, it lost track in the big and spacious room, when the ranges were far apart. 
+
+% In the case of the 2x2-resolution, the high-resolution trajectory was at some points as far as 1.4m from the
+% ground-truth pose, but the cumulated RMS error was only 43.4cm. This shows that a seemingly small difference in 
+% RMS error can mean an error of more than a meter at a part of the trajectory. The low-resolution trajectory in
+% comparison has a cumulated RMS error of 22.13cm. 7.95cm error on the x- and 14.17cm on the y-axis. The 
+% 1x1-resolution scenario did not produce any usable map or localization. 
+
+% These scenarios were unusable for the SLAM, so they were  not tested further.  
+
+
+
 
 \subsection{Effects of sampling rate}
 
-For the 4x4-resolution 400ms sampling time was chosen, based on the real sensor measurements. The timing 
-budget of 33ms was selected over the 18.5ms because it has a lower sampling rate. The dropped sampling rate 
+
+For the 4x4-resolution 400ms sampling time was chosen, based on the real sensor measurements.  The dropped sampling rate 
 from 30Hz to 2.5Hz was significant and made the tuning much harder. Two different grid resolution were tested 
 as well. The quality of the map was decent in both cases, no major flaws were visible. The global SLAM had to 
-compensate rotation drifts, that occurred when the drone turned around in the big room. Low grid resolution 
-produced a smoother path, while on high-resolution grid there were some edges and sharper turns. In general, 
-the configuration with a higher grid resolution felt very unstable. 
+compensate rotation drifts, that occurred when the drone quickly turned around in the big room, where some 
+ranges are in saturation. Low grid resolution produced a smoother path, while on high-resolution grid there 
+were some edges and sharper turns. High resolution felt less stable, than the low-resolution grid.
 
 The cumulated RMS error on a high grid resolution was 16.49cm, on low grid resolution it was higher: 18.95cm. 
 Higher grid-resolution results in greater accuracy in position estimates, but its stability is lower in comparison
@@ -586,6 +625,16 @@ rate and 2.75m as maximum distance. The tuning of the algorithm proved to be sig
 Testing multiple setups, finally 8 sensors were successful in the case of 4x4-resolution sensors. The RMS 
 cumulated error was 34.1cm. The 3x3-resolution failed. Therefore this setup is assumed to be the lowest number 
 of VL53L1X sensors, that is still able to produce consistent maps with Cartographer SLAM in 2D mode. 
+
+\subsection{Artifacts}
+The filtering caused 
+artifacts like curved corners and transition points that occured when an object was only partly in the field 
+of view and another distant object covered the rest of the ranging. These smooth transitions hide the sharp 
+edges of walls, making it harder to insert points and to find loop-closures. Third, the resolution with the 
+best performance from the second step was used with various sampling rates of the actual sensor. Forth, the 
+maximum distance was lowered to realistic, while keeping the same layout of the sensors. Finally, the number 
+of sensors was reduced until the lowest number, where the setup was still capable of producing a decent 
+quality map. 
 
 \section{Conclusion}
 
