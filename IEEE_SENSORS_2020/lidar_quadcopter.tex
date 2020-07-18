@@ -630,11 +630,21 @@ In this test, the goal was to find the minimum number of LIDAR sensors, with whi
 works reliably and can produce a coherent map. The sensors were set to 4x4 and 3x3-resolution, 400ms update 
 rate, and 2.75m as maximum distance. The tuning of the algorithm proved to be significantly harder this time. 
 8 sensors proved to be the lowest, using 7 already caused the submaps to fall apart. The RMS cumulated error 
-was 34.1cm for 4x4, while mapping has failed using 3x3-resolution.  
+was 34.1cm for 4x4, while mapping has failed using 3x3-resolution. 
 
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=0.5\textwidth]{08_map_8sensor_4x4.png}
+  % where an .eps filename suffix will be assumed under latex, 
+  % and a .pdf suffix will be assumed for pdflatex; or what has been declared
+  % via \DeclareGraphicsExtensions.
+  \caption{Map trajectory using 8 LIDAR sensors}
+  \label{fig_8_sensors}
+  \end{figure}
 
 \section{Conclusion}
 Indoor quadcopters require lightweight localization systems for navigation. An option for this task could be the application of stationary LIDAR sensors. The performance evaluation presented in this paper has shown that it is possible indeed to perform adequate localization using such sensors. In addition to the measurement and simulation analysis of different sensor setups, an optimal sensor configuration was presented. In this setup, there should be 8 stationary LIDAR sensors, as fewer sensors make the localization to fail.
+
 
 % conference papers do not normally have an appendix
 
