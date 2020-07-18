@@ -299,7 +299,7 @@ The issue here is the rather intense computation demand, which is hard to satisf
 limited power supply. 
 
 In this paper, the evaluation of a SLAM system is introduced that uses stationary VL53L1X LIDAR sensors to scan
-the drone's environment and uses Cartographer SLAM to construct maps. This solution might provide lightweight,
+the drone's environment and uses Cartographer SLAM\cite{filipenko2018comparison}\cite{cartographerPaper} to construct maps. This solution might provide lightweight,
 cheap, and computationally light alternative to currently used planar scanners. 
 
 Each setup is evaluated based on data collected from Gazebo simulator \cite{GazeboWebsite}, and LIDAR sensors are simulated with 
@@ -453,14 +453,14 @@ accuracy.
 % and a .pdf suffix will be assumed for pdflatex; or what has been declared
 % via \DeclareGraphicsExtensions.
 \caption{VL53L1X measurements.}
-\label{fig_sim}
+\label{fig_measurements}
 \end{figure}
 
 Based on the completed measurements, it can be seen that sampling time is independent of the distance preset 
 and is directly proportional to the resolution and the timing budget. In each tested 
 scenario, the most accurate measurements were always with resolution 1x1. By increasing the resolution, therefore
 lowering the receiver SPAD array size, the measured distance starts to deviate from the real distance, and 
-standard deviation increases. This can be seen at 2.5m distance with medium preset. Long-distance preset, 
+standard deviation increases. This can be seen at 2.5m distance with medium preset on figure \ref{fig_measurements}. Long-distance preset, 
 however produces more accurate measurements even on 3m, so it is preferred over medium preset. Measurements 
 with long-distance preset and 140ms timing budget follow the real distances even on 3 meters but start to 
 deviate at 3.5 meters with 2x2-resolution and above. Raising the timing budget to 200ms reduces the error 
@@ -630,7 +630,8 @@ In this test, the goal was to find the minimum number of LIDAR sensors, with whi
 works reliably and can produce a coherent map. The sensors were set to 4x4 and 3x3-resolution, 400ms update 
 rate, and 2.75m as maximum distance. The tuning of the algorithm proved to be significantly harder this time. 
 8 sensors proved to be the lowest, using 7 already caused the submaps to fall apart. The RMS cumulated error 
-was 34.1cm for 4x4, while mapping has failed using 3x3-resolution. 
+was 34.1cm for 4x4, while mapping has failed using 3x3-resolution. The map and trajectory built using 8 sensors
+can be seen on figure \ref{fig_8_sensors}.
 
 \begin{figure}[!t]
   \centering
