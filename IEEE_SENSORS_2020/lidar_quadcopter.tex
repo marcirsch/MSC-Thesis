@@ -293,7 +293,7 @@ discover the surroundings, create a map, and localize the robot in the map with 
 sensors. In an indoor scenario, this sensor is often the Light Detection and Ranging (LIDAR) sensor. 
 
 Many papers can be found about SLAM and LIDAR sensors capable of building highly accurate maps of building-interiors or even outdoors \cite{engel2014lsd} \cite{mur2015orb} \cite{engel2015large}. However, they are using precise, long range rotating planner scanners,
-which can be carried by large an industrial-grade hexacopter or octocopter only, and due to their weight, they are
+which can be carried by a large industrial-grade hexacopter or octocopter only, and due to their weight, they are
 not suitable for smaller quadcopters. Another frequent choice for drones is multiple cameras and image processing.
 The issue here is the rather intense computation demand, which is hard to satisfy on a small quadcopter with 
 limited power supply. 
@@ -460,7 +460,7 @@ Based on the completed measurements, it can be seen that sampling time is indepe
 and is directly proportional to the resolution and the timing budget. In each tested 
 scenario, the most accurate measurements were always with resolution 1x1. By increasing the resolution, therefore
 lowering the receiver SPAD array size, the measured distance starts to deviate from the real distance, and 
-standard deviation increases. This can be seen at 2.5m distance with medium preset on figure \ref{fig_measurements}. Long-distance preset, 
+standard deviation increases. This can be seen at 2.5m distance with medium preset in figure \ref{fig_measurements}. Long-distance preset, 
 however produces more accurate measurements even on 3m, so it is preferred over medium preset. Measurements 
 with long-distance preset and 140ms timing budget follow the real distances even on 3 meters but start to 
 deviate at 3.5 meters with 2x2-resolution and above. Raising the timing budget to 200ms reduces the error 
@@ -480,7 +480,7 @@ To be able to compare the performance of the SLAM algorithm with each sensor set
 is used. The collected data contains LIDAR measurements of the surroundings of the vehicle in 3D. In the Gazebo simulator, 
 LIDAR scanners are placed on the top and bottom of the quadcopter to evenly scan the top- and bottom 
 hemispheres. The drone was flown around inside a simulated building, that was designed to have rooms that only 
-have distances under the maximum distance of the ranging sensor and bigger rooms so that ranges some scans 
+have distances under the maximum distance of the ranging sensor and bigger rooms so that some ranges  
 can be saturated. The building contains no furniture but has doors and windows. All sensor and control messages are recorded. The LIDAR measurements update at 30Hz, while IMU is published at 50Hz.
 
 The recorded data is filtered to simulate the VL53L1X sensors in a specific layout, all with the same settings. 
@@ -631,7 +631,7 @@ works reliably and can produce a coherent map. The sensors were set to 4x4 and 3
 rate, and 2.75m as maximum distance. The tuning of the algorithm proved to be significantly harder this time. 
 8 sensors proved to be the lowest, using 7 already caused the submaps to fall apart. The RMS cumulated error 
 was 34.1cm for 4x4, while mapping has failed using 3x3-resolution. The map and trajectory built using 8 sensors
-can be seen on figure \ref{fig_8_sensors}.
+can be seen in figure \ref{fig_8_sensors}.
 
 \begin{figure}[!t]
   \centering
